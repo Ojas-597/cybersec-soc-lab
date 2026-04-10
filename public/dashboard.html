@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="nav">
+  <h2>Dashboard</h2>
+  <a href="/logout">Logout</a>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h3>User Info</h3>
+    <p id="user"></p>
+  </div>
+
+  <br>
+
+  <div class="card">
+    <h3>Available Practical Labs</h3>
+    <ul>
+      <li><a href="#">FTP Backdoor Attack</a></li>
+      <li><a href="#">SQL Injection</a></li>
+      <li><a href="#">Cross-Site Scripting (XSS)</a></li>
+      <li><a href="#">Password Cracking</a></li>
+    </ul>
+  </div>
+
+  <br>
+
+  <div class="card">
+    <h3>System Status</h3>
+    <p>✔ Logged in successfully</p>
+    <p>✔ Session active</p>
+  </div>
+
+</div>
+
+<script>
+fetch('/me')
+.then(res => res.json())
+.then(user => {
+  if (!user) window.location = "login.html";
+  document.getElementById("user").innerText =
+    "Username: " + user.username + " | Role: " + user.role;
+});
+</script>
+
+</body>
+  </html>
