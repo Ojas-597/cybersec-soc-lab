@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="nav">
+  <h2>Admin Panel</h2>
+  <div>
+    <a href="dashboard.html">Dashboard</a> |
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Admin Info -->
+  <div class="card">
+    <h3>Admin Access</h3>
+    <p id="adminInfo"></p>
+  </div>
+
+  <br>
+
+  <!-- Users List -->
+  <div class="card">
+    <h3>All Users</h3>
+    <ul id="users"></ul>
+  </div>
+
+</div>
+
+<script>
+
+// 🔐 Check admin access
+fetch('/me')
+.then(res => res.json())
+.then(user => {
+  if (!user || user.role !== "admin") {
+    alert("Access denied");
+    window.location = "dashboard.html";
+  }
+
+  document.getElementById("adminInfo").innerText =
+    "Logged in as: " + user.username;
+});
+
+// 👥 Load users
+fetch('/users')
+.then(res => res.json())
+.then(data => {
+  let list = document.getElementById("users");
+
+  data.forEach(u => {
+    let li = document.createElement("li");
+
+    li.innerHTML = `
+      ${u.username} (${u.role})
+      ${u.role !== "admin" ? 
+        `<a href="/delete/${u._id}" style="color:red; margin-left:10px;">Delete</a>` 
+        : ""}
+    `;
+
+    list.appendChild(li);
+  });
+});
+
+</script>
+
+</body>
+</html>
