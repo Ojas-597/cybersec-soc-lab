@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Report</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>📄 Security Report</h2>
+
+<div id="report"></div>
+
+<script>
+let d = JSON.parse(localStorage.getItem("report"));
+
+if(d){
+ document.getElementById("report").innerHTML = `
+  <div class="card">
+   Attack: ${d.def}<br>
+   Impact: ${d.severity}<br>
+   Solution: ${d.solution}
+  </div>
+ `;
+}
+</script>
+
+</body>
+</html>
