@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2 id="title"></h2>
+
+<p id="def"></p>
+<p id="how"></p>
+<p id="case"></p>
+
+<h3>Command</h3>
+<pre id="commands"></pre>
+
+<h3>Output</h3>
+<pre id="output"></pre>
+
+<h3>Solution</h3>
+<p id="solution"></p>
+
+<script>
+
+const data = {
+  "SQL Injection": {
+    def: "Injection of malicious SQL queries",
+    how: "Unsanitized input fields",
+    case: "Login bypass attack",
+    commands: "' OR '1'='1",
+    output: "Login successful without password",
+    solution: "Use prepared statements"
+  },
+
+  "Port Scanning": {
+    def: "Scanning open ports",
+    how: "Using network scanners",
+    case: "Recon phase",
+    commands: "nmap -sV 192.168.1.1",
+    output: "PORT 80 open HTTP",
+    solution: "Close unused ports"
+  },
+
+  "Phishing": {
+    def: "Fake emails to steal data",
+    how: "Social engineering",
+    case: "Fake login pages",
+    commands: "SET toolkit",
+    output: "User enters credentials",
+    solution: "User awareness"
+  }
+};
+
+let attack = new URLSearchParams(location.search).get("attack");
+
+document.getElementById("title").innerText = attack;
+
+if (data[attack]) {
+  document.getElementById("def").innerText = "Definition: " + data[attack].def;
+  document.getElementById("how").innerText = "How it works: " + data[attack].how;
+  document.getElementById("case").innerText = "Case: " + data[attack].case;
+  document.getElementById("commands").innerText = data[attack].commands;
+  document.getElementById("output").innerText = data[attack].output;
+  document.getElementById("solution").innerText = data[attack].solution;
+} else {
+  document.getElementById("commands").innerText = "No data available";
+}
+
+</script>
+
+</body>
+</html>
