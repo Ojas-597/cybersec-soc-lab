@@ -1,6 +1,6 @@
 const express = require("express");
 const Query = require("../models/Query");
-const Log = require("../models/Log");
+const Log = require("../models/Logs");
 
 const { isAuth } = require("../middleware/auth");
 
