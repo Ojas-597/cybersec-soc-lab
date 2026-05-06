@@ -2,14 +2,16 @@ const express = require("express");
 const Query = require("../models/Query");
 const Log = require("../models/Log");
 
+const { isAuth } = require("../middleware/auth");
+
 const router = express.Router();
 
-router.post("/ask", async (req, res) => {
+router.post("/ask", isAuth, async (req, res) => {
+
   let q = req.body.question.toLowerCase();
 
   let results = [];
 
-  // 🔴 SQL Injection
   if (q.includes("login") || q.includes("bypass")) {
     results.push({
       attack: "SQL Injection",
@@ -19,7 +21,6 @@ router.post("/ask", async (req, res) => {
     });
   }
 
-  // 🟡 Sniffing
   if (q.includes("slow") || q.includes("traffic")) {
     results.push({
       attack: "Sniffing",
@@ -29,7 +30,6 @@ router.post("/ask", async (req, res) => {
     });
   }
 
-  // 🔵 Port Scanning
   if (q.includes("port") || q.includes("open")) {
     results.push({
       attack: "Port Scanning",
@@ -39,36 +39,34 @@ router.post("/ask", async (req, res) => {
     });
   }
 
-  // 🟣 Phishing
-  if (q.includes("phishing") || q.includes("email")) {
+  if (q.includes("phishing")) {
     results.push({
       attack: "Phishing",
       tool: "Social Engineering Toolkit",
-      solution: "User awareness training",
+      solution: "User awareness",
       confidence: "75%"
     });
   }
 
-  // ⚪ Default
   if (results.length === 0) {
     results.push({
       attack: "Unknown",
       tool: "Nmap",
-      solution: "Perform full scan",
+      solution: "Perform scan",
       confidence: "40%"
     });
   }
 
-  // 💾 Save query
+  // 💾 Save Query
   await Query.create({
-    user: req.session.user?.username || "guest",
+    user: req.session.user.username,
     question: req.body.question,
     response: JSON.stringify(results)
   });
 
-  // 📊 Log entry
+  // 📊 Log
   await Log.create({
-    message: `Detected: ${results.map(r => r.attack).join(", ")}`,
+    message: `Query by ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
     level: "INFO"
   });
 
