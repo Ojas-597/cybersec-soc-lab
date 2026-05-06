@@ -1,3 +1,5 @@
+require("dotenv").config(); // 🔐 Load environment variables
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -12,9 +14,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: "soclab-secret",
+  secret: process.env.SESSION_SECRET, // 🔐 from .env
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false // set true if using HTTPS
+  }
 }));
 
 /* =========================
@@ -23,11 +29,9 @@ app.use(session({
 app.use(express.static(path.join(__dirname, "public")));
 
 /* =========================
-   🗄️ MONGODB CONNECTION (Atlas)
+   🗄️ MONGODB CONNECTION
 ========================= */
-mongoose.connect(
-  "mongodb+srv://admin:<db_password>@cluster0.zrqcfpr.mongodb.net/?appName=Cluster0"
-)
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("✅ MongoDB Connected"))
 .catch(err => console.log("❌ MongoDB Error:", err));
 
@@ -43,24 +47,24 @@ app.use("/", queryRoutes);
 app.use("/", logRoutes);
 
 /* =========================
-   🧪 TEST ROUTE
+   🧪 HEALTH CHECK
 ========================= */
 app.get("/test", (req, res) => {
   res.send("🚀 SOC Lab Server Running");
 });
 
 /* =========================
-   ⚠️ ERROR HANDLING
+   ⚠️ ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).send("Server Error");
+  console.error("❌ Error:", err);
+  res.status(500).send("Internal Server Error");
 });
 
 /* =========================
    🚀 START SERVER
 ========================= */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🔥 Server running at http://localhost:${PORT}`);
