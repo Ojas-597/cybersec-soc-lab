@@ -1,7 +1,79 @@
-<h1>Signup</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<form method="POST" action="/signup">
-<input name="username"><br><br>
-<input type="password" name="password"><br><br>
-<button>Signup</button>
+<h2>📝 Create Account</h2>
+
+<div class="card">
+
+<form onsubmit="return registerUser()">
+
+  <input id="username" placeholder="Username" required><br>
+
+  <input id="password" type="password" placeholder="Password (min 6 chars)" required><br>
+
+  <input id="confirm" type="password" placeholder="Confirm Password" required><br>
+
+  <select id="role">
+    <option value="user">User</option>
+    <option value="analyst">Analyst</option>
+  </select><br>
+
+  <button type="submit">Register</button>
+
 </form>
+
+<p id="msg"></p>
+
+</div>
+
+<script>
+
+async function registerUser(){
+
+  let username = document.getElementById("username").value;
+  let password = document.getElementById("password").value;
+  let confirm = document.getElementById("confirm").value;
+  let role = document.getElementById("role").value;
+
+  let msg = document.getElementById("msg");
+
+  // validations
+  if(password.length < 6){
+    msg.innerText = "❌ Password must be at least 6 characters";
+    return false;
+  }
+
+  if(password !== confirm){
+    msg.innerText = "❌ Passwords do not match";
+    return false;
+  }
+
+  let res = await fetch('/signup', {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({username, password, role})
+  });
+
+  let text = await res.text();
+
+  msg.innerText = text;
+
+  if(text.includes("Success")){
+    msg.style.color = "#22c55e";
+    setTimeout(()=> window.location="login.html", 1500);
+  } else {
+    msg.style.color = "red";
+  }
+
+  return false;
+}
+
+</script>
+
+</body>
+</html>
