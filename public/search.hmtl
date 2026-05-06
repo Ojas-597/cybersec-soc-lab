@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>🔍 Search Vulnerability</h2>
+
+<input placeholder="Search..." id="search" onkeyup="search()">
+
+<div id="results"></div>
+
+<script>
+const attacks = ["SQL Injection","Port Scanning","Phishing","Sniffing"];
+
+function search() {
+ let q = document.getElementById("search").value;
+
+ let res = attacks.filter(a =>
+   a.toLowerCase().includes(q.toLowerCase())
+ );
+
+ document.getElementById("results").innerHTML =
+   res.map(r =>
+   `<div style="margin:10px;">
+     <a href="lab.html?attack=${r}">${r}</a>
+   </div>`
+ ).join("");
+}
+</script>
+
+</body>
+</html>
