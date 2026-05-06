@@ -1,54 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>SOC Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="nav">
-  <h2>Dashboard</h2>
-  <a href="/logout">Logout</a>
+<h1>🛡️ CyberSec SOC Dashboard</h1>
+
+<!-- USER INFO -->
+<div id="userBox" style="border:1px solid white; padding:10px; margin-bottom:20px;"></div>
+
+<!-- ANALYTICS -->
+<div style="border:1px solid white; padding:10px; margin-bottom:20px;">
+  <h3>📊 System Analytics</h3>
+  <div id="stats"></div>
 </div>
 
-<div class="container">
+<!-- NAVIGATION -->
+<div style="border:1px solid white; padding:10px;">
+  <h3>🧠 SOC Tools</h3>
 
-  <div class="card">
-    <h3>User Info</h3>
-    <p id="user"></p>
-  </div>
+  <a href="search.html">🔍 Search Vulnerabilities</a><br><br>
+
+  <a href="lab.html?attack=SQL Injection">🧪 Run Attack Simulation</a><br><br>
+
+  <a href="query.html">📡 Ask SOC (AI Multi Detection)</a><br><br>
+
+  <a href="quiz.html">🧠 Take Quiz</a><br><br>
+
+  <a href="upload.html">📂 Upload Evidence</a><br><br>
+
+  <a href="report.html">📄 View Report</a><br><br>
+
+  <!-- ROLE-BASED LINKS -->
+  <div id="adminLinks"></div>
 
   <br>
-
-  <div class="card">
-    <h3>Available Practical Labs</h3>
-    <ul>
-      <li><a href="#">FTP Backdoor Attack</a></li>
-      <li><a href="#">SQL Injection</a></li>
-      <li><a href="#">Cross-Site Scripting (XSS)</a></li>
-      <li><a href="#">Password Cracking</a></li>
-    </ul>
-  </div>
-
-  <br>
-
-  <div class="card">
-    <h3>System Status</h3>
-    <p>✔ Logged in successfully</p>
-    <p>✔ Session active</p>
-  </div>
-
+  <a href="/logout">🚪 Logout</a>
 </div>
 
 <script>
+
+// 👤 USER INFO + ROLE CONTROL
 fetch('/me')
-.then(res => res.json())
-.then(user => {
-  if (!user) window.location = "login.html";
-  document.getElementById("user").innerText =
-    "Username: " + user.username + " | Role: " + user.role;
+.then(r => r.json())
+.then(u => {
+
+  if (!u) {
+    window.location = "login.html";
+    return;
+  }
+
+  document.getElementById("userBox").innerHTML = `
+    <b>User:</b> ${u.username} <br>
+    <b>Role:</b> ${u.role}
+  `;
+
+  let links = "";
+
+  // 👑 ADMIN
+  if (u.role === "admin") {
+    links += `
+      <a href="admin.html">👑 Admin Panel</a><br><br>
+      <a href="logs.html">📊 View Logs</a><br><br>
+    `;
+  }
+
+  // 🧪 ANALYST
+  if (u.role === "analyst") {
+    links += `
+      <a href="logs.html">📊 View Logs</a><br><br>
+    `;
+  }
+
+  document.getElementById("adminLinks").innerHTML = links;
 });
+
+
+// 📊 ANALYTICS
+fetch('/stats')
+.then(r => r.json())
+.then(d => {
+
+  document.getElementById("stats").innerHTML = `
+    👥 Total Users: ${d.users} <br>
+    📊 Logs Generated: ${d.logs} <br>
+    🔥 Top Attack: ${d.topAttack}
+  `;
+});
+
 </script>
 
 </body>
-  </html>
+</html>
