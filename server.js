@@ -7,7 +7,7 @@ const app = express();
 mongoose.connect("mongodb://127.0.0.1:27017/cyberwiki");
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use(express.json());
 
 app.use(session({
   secret: "secret",
@@ -15,7 +15,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
-const authRoutes = require("./routes/auth");
-app.use("/", authRoutes);
+app.use(express.static("public"));
 
-app.listen(3000, () => console.log("Server running"));
+app.use(require("./routes/auth"));
+app.use(require("./routes/log"));
+app.use(require("./routes/query"));
+
+app.listen(3000, () => console.log("Server running on 3000"));
