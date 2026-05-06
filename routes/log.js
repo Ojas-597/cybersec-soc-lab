@@ -1,5 +1,5 @@
 const express = require("express");
-const Log = require("../models/Log");
+const Log = require("../models/Logs");
 
 const { isAuth, isAnalyst } = require("../middleware/auth");
 
