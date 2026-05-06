@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>🧠 Cybersecurity Quiz</h2>
+
+<p>What tool is used for port scanning?</p>
+
+<button onclick="ans(false)">Wireshark</button>
+<button onclick="ans(true)">Nmap</button>
+
+<p id="res"></p>
+
+<script>
+function ans(correct){
+ document.getElementById("res").innerText =
+ correct ? "Correct ✅" : "Wrong ❌";
+}
+</script>
+
+</body>
+</html>
