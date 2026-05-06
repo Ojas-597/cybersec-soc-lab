@@ -1,8 +1,12 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const Log = require("../models/Log");
+
+const { isAuth, isAdmin } = require("../middleware/auth");
 
 const router = express.Router();
+
 
 // 🔹 SIGNUP
 router.post("/signup", async (req, res) => {
@@ -17,7 +21,6 @@ router.post("/signup", async (req, res) => {
     return res.send("❌ Password must be at least 6 characters");
   }
 
-  // 🔍 check duplicate user
   const exists = await User.findOne({ username });
   if (exists) {
     return res.send("❌ User already exists");
@@ -29,6 +32,11 @@ router.post("/signup", async (req, res) => {
     username,
     password: hash,
     role: role || "user"
+  });
+
+  await Log.create({
+    message: `New user registered: ${username}`,
+    level: "INFO"
   });
 
   res.send("✅ Registration Success");
@@ -48,42 +56,53 @@ router.post("/login", async (req, res) => {
 
   req.session.user = user;
 
+  await Log.create({
+    message: `User logged in: ${user.username}`,
+    level: "INFO"
+  });
+
   res.redirect("/dashboard.html");
 });
 
 
 // 🔹 CURRENT USER
-router.get("/me", (req, res) => {
-  res.json(req.session.user || null);
+router.get("/me", isAuth, (req, res) => {
+  res.json(req.session.user);
 });
 
 
 // 🔹 LOGOUT
-router.get("/logout", (req, res) => {
+router.get("/logout", isAuth, (req, res) => {
   req.session.destroy();
   res.redirect("/login.html");
 });
 
 
-// 🔹 ADMIN USERS
-router.get("/users", async (req, res) => {
-  if (req.session.user?.role !== "admin") return res.send("Denied");
+// 🔹 ADMIN: GET USERS
+router.get("/users", isAuth, isAdmin, async (req, res) => {
   res.json(await User.find());
 });
 
 
-// 🔹 DELETE USER
-router.get("/delete/:id", async (req, res) => {
-  if (req.session.user?.role !== "admin") return res.send("Denied");
+// 🔹 ADMIN: DELETE USER
+router.get("/delete/:id", isAuth, isAdmin, async (req, res) => {
+
   await User.findByIdAndDelete(req.params.id);
+
+  await Log.create({
+    message: `User deleted: ${req.params.id}`,
+    level: "WARNING"
+  });
+
   res.redirect("/admin.html");
 });
 
 
 // 🔹 STATS
-router.get("/stats", async (req, res) => {
+router.get("/stats", isAuth, async (req, res) => {
+
   const users = await User.countDocuments();
-  const logs = await require("../models/Log").countDocuments();
+  const logs = await Log.countDocuments();
 
   res.json({
     users,
