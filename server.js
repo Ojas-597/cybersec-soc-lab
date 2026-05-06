@@ -10,15 +10,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
-  secret: "secret",
+  secret: "secretkey",
   resave: false,
   saveUninitialized: true
 }));
 
 app.use(express.static("public"));
 
+// routes
 app.use(require("./routes/auth"));
-app.use(require("./routes/log"));
 app.use(require("./routes/query"));
+app.use(require("./routes/log"));
 
 app.listen(3000, () => console.log("Server running on 3000"));
