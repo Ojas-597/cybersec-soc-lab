@@ -1,91 +1,63 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
-
 const router = express.Router();
 
-// ================= SIGNUP =================
+// signup
 router.post("/signup", async (req, res) => {
-  try {
-    const { username, password } = req.body;
+  const hash = await bcrypt.hash(req.body.password, 10);
 
-    // check if user exists
-    const existing = await User.findOne({ username });
-    if (existing) return res.send("User already exists");
+  await User.create({
+    username: req.body.username,
+    password: hash,
+    role: req.body.role || "user"
+  });
 
-    const hash = await bcrypt.hash(password, 10);
-
-    await User.create({
-      username,
-      password: hash,
-      role: "user"
-    });
-
-    res.redirect("/login.html");
-
-  } catch (err) {
-    res.send("Signup error");
-  }
+  res.redirect("/login.html");
 });
 
-// ================= LOGIN =================
+// login
 router.post("/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
+  const user = await User.findOne({ username: req.body.username });
+  if (!user) return res.send("User not found");
 
-    const user = await User.findOne({ username });
-    if (!user) return res.send("User not found");
+  const ok = await bcrypt.compare(req.body.password, user.password);
+  if (!ok) return res.send("Wrong password");
 
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.send("Wrong password");
-
-    req.session.user = user;
-    res.redirect("/dashboard.html");
-
-  } catch (err) {
-    res.send("Login error");
-  }
+  req.session.user = user;
+  res.redirect("/dashboard.html");
 });
 
-// ================= CURRENT USER =================
+// current user
 router.get("/me", (req, res) => {
   res.json(req.session.user || null);
 });
 
-// ================= LOGOUT =================
+// logout
 router.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/login.html");
 });
 
-// ================= ADMIN: GET USERS =================
+// users (admin)
 router.get("/users", async (req, res) => {
-  try {
-    if (req.session.user?.role !== "admin") {
-      return res.send("Access denied");
-    }
-
-    const users = await User.find();
-    res.json(users);
-
-  } catch (err) {
-    res.send("Error fetching users");
-  }
+  if (req.session.user?.role !== "admin") return res.send("Denied");
+  res.json(await User.find());
 });
 
-// ================= ADMIN: DELETE USER =================
+// delete user
 router.get("/delete/:id", async (req, res) => {
-  try {
-    if (req.session.user?.role !== "admin") {
-      return res.send("Access denied");
-    }
+  if (req.session.user?.role !== "admin") return res.send("Denied");
+  await User.findByIdAndDelete(req.params.id);
+  res.redirect("/admin.html");
+});
 
-    await User.findByIdAndDelete(req.params.id);
-    res.redirect("/admin.html");
+// stats
+router.get("/stats", async (req, res) => {
+  const users = await User.countDocuments();
+  const logs = await require("../models/Log").countDocuments();
 
-  } catch (err) {
-    res.send("Delete error");
-  }
+  res.json({ users, logs, topAttack: "SQL Injection" });
 });
 
 module.exports = router;
