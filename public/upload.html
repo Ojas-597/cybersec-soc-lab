@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>📂 Upload Evidence</h2>
+
+<input type="file" onchange="upload(this.files[0])">
+
+<p id="msg"></p>
+
+<script>
+function upload(file){
+ document.getElementById("msg").innerText =
+  "Uploaded: " + file.name;
+}
+</script>
+
+</body>
+</html>
