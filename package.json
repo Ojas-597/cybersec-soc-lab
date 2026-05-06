@@ -1,14 +1,29 @@
 {
   "name": "cybersec-soc-lab",
   "version": "1.0.0",
+  "description": "Cybersecurity SOC Lab with RBAC, attack simulation, and AI-based vulnerability analysis",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
+  "keywords": [
+    "cybersecurity",
+    "soc",
+    "penetration-testing",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "dotenv": "^16.4.0",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "mongoose": "^7.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   }
 }
