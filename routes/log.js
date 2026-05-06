@@ -1,17 +1,26 @@
 const express = require("express");
 const Log = require("../models/Log");
+
+const { isAuth, isAnalyst } = require("../middleware/auth");
+
 const router = express.Router();
 
-router.post("/log", async (req, res) => {
+
+// ➕ ADD LOG
+router.post("/log", isAuth, async (req, res) => {
+
   await Log.create(req.body);
-  res.send("log added");
+
+  res.send("Log added");
 });
 
-router.get("/logs", async (req, res) => {
-  if (!["admin","analyst"].includes(req.session.user?.role))
-    return res.send("Denied");
 
-  res.json(await Log.find());
+// 📊 VIEW LOGS (Analyst/Admin only)
+router.get("/logs", isAuth, isAnalyst, async (req, res) => {
+
+  const logs = await Log.find().sort({ time: -1 });
+
+  res.json(logs);
 });
 
 module.exports = router;
