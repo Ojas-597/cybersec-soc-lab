@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SOC Logs</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>📊 SOC Logs</h2>
+
+<ul id="logs"></ul>
+
+<script>
+
+// 🔐 role check
+fetch('/me')
+.then(r=>r.json())
+.then(u=>{
+  if(!u || !["admin","analyst"].includes(u.role)){
+    alert("Access denied");
+    window.location="dashboard.html";
+  }
+});
+
+// 📡 fetch logs
+fetch('/logs')
+.then(r=>r.json())
+.then(data=>{
+ let list = document.getElementById("logs");
+
+ data.forEach(l=>{
+   let li = document.createElement("li");
+
+   li.innerText = `[${l.level}] ${l.message} (${new Date(l.time).toLocaleString()})`;
+
+   list.appendChild(li);
+ });
+});
+
+</script>
+
+</body>
+</html>
