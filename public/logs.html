@@ -1,52 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
+
   <title>SOC Logs</title>
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
 <div class="container">
 
-<h1>📡 SOC Logs</h1>
+  <h1>📡 Realtime SOC Logs</h1>
 
-<table class="table">
+  <table class="table">
 
-<thead>
-<tr>
-<th>Level</th>
-<th>Message</th>
-</tr>
-</thead>
+    <thead>
 
-<tbody id="logs"></tbody>
+      <tr>
+        <th>Level</th>
+        <th>Message</th>
+        <th>Time</th>
+      </tr>
 
-</table>
+    </thead>
+
+    <tbody id="logs"></tbody>
+
+  </table>
 
 </div>
 
+
+<!-- SOCKET.IO -->
+<script src="/socket.io/socket.io.js"></script>
+
 <script>
 
+const logsTable = document.getElementById("logs");
+
+
+/* =========================
+   LOAD EXISTING LOGS
+========================= */
+
 fetch('/logs')
-.then(r=>r.json())
-.then(data=>{
 
- let logs = document.getElementById('logs');
+.then(r => r.json())
 
- data.forEach(l=>{
+.then(data => {
 
- logs.innerHTML += `
+  logsTable.innerHTML = "";
 
- <tr>
-   <td><span class="badge">${l.level}</span></td>
-   <td>${l.message}</td>
- </tr>
+  data.forEach(addLog);
 
- `;
+});
 
- })
 
-})
+/* =========================
+   ADD LOG ROW
+========================= */
+
+function addLog(log) {
+
+  logsTable.innerHTML += `
+
+    <tr>
+
+      <td>
+        <span class="badge">
+          ${log.level}
+        </span>
+      </td>
+
+      <td>${log.message}</td>
+
+      <td>
+        ${new Date(log.time).toLocaleString()}
+      </td>
+
+    </tr>
+
+  `;
+}
+
+
+/* =========================
+   REALTIME SOCKET
+========================= */
+
+const socket = io();
+
+socket.on("new-threat", (data) => {
+
+  addLog({
+
+    level: data.severity,
+
+    message:
+      `🚨 ${data.attack} threat detected (${data.confidence})`,
+
+    time: data.time
+
+  });
+
+});
 
 </script>
 
