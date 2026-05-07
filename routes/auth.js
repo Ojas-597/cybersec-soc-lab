@@ -95,7 +95,7 @@ router.post("/signup", async (req, res) => {
       message:
         `New user registered: ${username}`,
 
-       level: results[0].severity
+      level: "INFO"
 
     });
 
@@ -204,7 +204,7 @@ router.post("/login", async (req, res) => {
       message:
         `User logged in: ${user.username}`,
 
-      level: "INFO"
+      level: results[0].severity
 
     });
 
