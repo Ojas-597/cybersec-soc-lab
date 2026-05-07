@@ -12,39 +12,32 @@
 
 <h1>📤 Upload Security Evidence</h1>
 
-<p>
-Upload screenshots, logs, or captured evidence
-for SOC analysis.
-</p>
-
 <form>
 
 <input type="file">
+<br><br>
 
-<textarea placeholder="Describe uploaded evidence..."></textarea>
+<textarea placeholder="Describe evidence..."></textarea>
+<br><br>
 
-<button type="submit">
-Upload Evidence
-</button>
+<button>Upload</button>
 
 </form>
 
 </div>
 
-<div class="card" style="margin-top:20px;">
-
-<h2>🤖 Analysis Result</h2>
-
-<p>
-Potential suspicious traffic detected.
-Recommended inspection using Wireshark.
-</p>
-
-<span class="badge">Medium Risk</span>
-
 </div>
 
-</div>
+<script>
+fetch("/me")
+.then(r=>r.json())
+.then(data=>{
+  if(data.user.role !== "admin"){
+    alert("Access Denied");
+    window.location.href="dashboard.html";
+  }
+});
+</script>
 
 </body>
 </html>
