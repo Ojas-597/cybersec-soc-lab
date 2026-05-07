@@ -1,95 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SOC Dashboard</title>
+  <title>Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🛡️ CyberSec SOC Dashboard</h1>
+<div class="navbar">
+  <div class="logo">📊 SOC Dashboard</div>
 
-<!-- USER INFO -->
-<div id="userBox" style="border:1px solid white; padding:10px; margin-bottom:20px;"></div>
-
-<!-- ANALYTICS -->
-<div style="border:1px solid white; padding:10px; margin-bottom:20px;">
-  <h3>📊 System Analytics</h3>
-  <div id="stats"></div>
+  <div class="nav-links">
+    <a href="search.html">Search</a>
+    <a href="logs.html">Logs</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="/logout">Logout</a>
+  </div>
 </div>
 
-<!-- NAVIGATION -->
-<div style="border:1px solid white; padding:10px;">
-  <h3>🧠 SOC Tools</h3>
+<div class="container">
 
-  <a href="search.html">🔍 Search Vulnerabilities</a><br><br>
+  <h1>Welcome to SOC Monitoring Center</h1>
 
-  <a href="lab.html?attack=SQL Injection">🧪 Run Attack Simulation</a><br><br>
+  <div class="card-grid">
 
-  <a href="query.html">📡 Ask SOC (AI Multi Detection)</a><br><br>
+    <div class="card">
+      <h3>Total Incidents</h3>
+      <h1>124</h1>
+    </div>
 
-  <a href="quiz.html">🧠 Take Quiz</a><br><br>
+    <div class="card">
+      <h3>Critical Threats</h3>
+      <h1>8</h1>
+    </div>
 
-  <a href="upload.html">📂 Upload Evidence</a><br><br>
+    <div class="card">
+      <h3>Network Alerts</h3>
+      <h1>52</h1>
+    </div>
 
-  <a href="report.html">📄 View Report</a><br><br>
+  </div>
 
-  <!-- ROLE-BASED LINKS -->
-  <div id="adminLinks"></div>
+  <div class="result-box">
 
-  <br>
-  <a href="/logout">🚪 Logout</a>
+    <h2>🤖 AI Attack Recommendation System</h2>
+
+    <input id="q" placeholder="Describe security issue...">
+
+    <button onclick="ask()">Analyze Threat</button>
+
+    <div id="res"></div>
+
+  </div>
+
 </div>
 
 <script>
+function ask(){
 
-// 👤 USER INFO + ROLE CONTROL
-fetch('/me')
-.then(r => r.json())
-.then(u => {
+ fetch('/ask', {
+   method:'POST',
+   headers:{
+     'Content-Type':'application/json'
+   },
+   body:JSON.stringify({
+     question:document.getElementById('q').value
+   })
+ })
+ .then(r=>r.json())
+ .then(d=>{
 
-  if (!u) {
-    window.location = "login.html";
-    return;
-  }
+   document.getElementById('res').innerHTML=`
 
-  document.getElementById("userBox").innerHTML = `
-    <b>User:</b> ${u.username} <br>
-    <b>Role:</b> ${u.role}
-  `;
+   <div class="card">
 
-  let links = "";
+   <h3>Attack Detected</h3>
+   <p><b>${d.attack}</b></p>
 
-  // 👑 ADMIN
-  if (u.role === "admin") {
-    links += `
-      <a href="admin.html">👑 Admin Panel</a><br><br>
-      <a href="logs.html">📊 View Logs</a><br><br>
-    `;
-  }
+   <br>
 
-  // 🧪 ANALYST
-  if (u.role === "analyst") {
-    links += `
-      <a href="logs.html">📊 View Logs</a><br><br>
-    `;
-  }
+   <h3>Recommended Tool</h3>
+   <p>${d.tool}</p>
 
-  document.getElementById("adminLinks").innerHTML = links;
-});
+   <br>
 
+   <h3>Solution</h3>
+   <p>${d.solution}</p>
 
-// 📊 ANALYTICS
-fetch('/stats')
-.then(r => r.json())
-.then(d => {
+   </div>
 
-  document.getElementById("stats").innerHTML = `
-    👥 Total Users: ${d.users} <br>
-    📊 Logs Generated: ${d.logs} <br>
-    🔥 Top Attack: ${d.topAttack}
-  `;
-});
+   `;
 
+ })
+}
 </script>
 
 </body>
