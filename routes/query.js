@@ -65,7 +65,7 @@ router.post("/ask", isAuth, async (req, res) => {
   });
 
   // 📊 Log
-  await Log.create({
+  await Logs.create({
     message: `Query by ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
     level: "INFO"
   });
