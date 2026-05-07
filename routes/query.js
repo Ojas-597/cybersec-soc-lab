@@ -119,7 +119,7 @@ router.post("/ask", isAuth, async (req, res) => {
       message:
         `Threat detected for ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
 
-      level: "INFO"
+        level: results[0].severity
 
     });
 
