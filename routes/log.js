@@ -9,7 +9,7 @@ const router = express.Router();
 // ➕ ADD LOG
 router.post("/log", isAuth, async (req, res) => {
 
-  await Log.create(req.body);
+  await Logs.create(req.body);
 
   res.send("Log added");
 });
@@ -18,7 +18,7 @@ router.post("/log", isAuth, async (req, res) => {
 // 📊 VIEW LOGS (Analyst/Admin only)
 router.get("/logs", isAuth, isAnalyst, async (req, res) => {
 
-  const logs = await Log.find().sort({ time: -1 });
+  const logs = await Logs.find().sort({ time: -1 });
 
   res.json(logs);
 });
