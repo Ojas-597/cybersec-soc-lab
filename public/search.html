@@ -1,21 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Search</title>
+  <title>Search Vulnerabilities</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>🔍 Search Vulnerability</h2>
+<div class="container">
 
-<input placeholder="Search..." id="search" onkeyup="search()">
+<h1>🔍 Search Vulnerability</h1>
 
-<div id="results"></div>
+<input placeholder="Search vulnerability..." id="search" onkeyup="search()">
+
+<div id="results" class="card-grid"></div>
+
+</div>
 
 <script>
-const attacks = ["SQL Injection","Port Scanning","Phishing","Sniffing"];
+
+const attacks = [
+  "SQL Injection",
+  "XSS",
+  "Nmap",
+  "Phishing",
+  "Wireshark",
+  "Spoofing"
+];
 
 function search() {
+
  let q = document.getElementById("search").value;
 
  let res = attacks.filter(a =>
@@ -23,12 +36,18 @@ function search() {
  );
 
  document.getElementById("results").innerHTML =
-   res.map(r =>
-   `<div style="margin:10px;">
-     <a href="lab.html?attack=${r}">${r}</a>
-   </div>`
- ).join("");
+ res.map(r => `
+
+ <div class="card">
+   <h3>${r}</h3>
+   <a href="lab.html?attack=${r}">
+     <button>Open Lab</button>
+   </a>
+ </div>
+
+ `).join("");
 }
+
 </script>
 
 </body>
