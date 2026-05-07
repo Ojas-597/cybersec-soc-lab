@@ -1,97 +1,343 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Dashboard</title>
+
+  <title>SOC Dashboard</title>
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
+<!-- =========================
+     NAVBAR
+========================= -->
+
 <div class="navbar">
-  <div class="logo">📊 SOC Dashboard</div>
+
+  <div class="logo">
+    📊 SOC Dashboard
+  </div>
 
   <div class="nav-links">
+
     <a href="search.html">Search</a>
+
     <a href="logs.html">Logs</a>
+
     <a href="quiz.html">Quiz</a>
+
     <a href="/logout">Logout</a>
+
   </div>
+
 </div>
+
+
+<!-- =========================
+     MAIN CONTAINER
+========================= -->
 
 <div class="container">
 
   <h1>Welcome to SOC Monitoring Center</h1>
 
+
+  <!-- =========================
+       LIVE STATS
+  ========================= -->
+
   <div class="card-grid">
 
     <div class="card">
+
       <h3>Total Incidents</h3>
-      <h1>124</h1>
+
+      <h1 id="incidents">
+        0
+      </h1>
+
     </div>
 
+
     <div class="card">
+
       <h3>Critical Threats</h3>
-      <h1>8</h1>
+
+      <h1 id="critical">
+        0
+      </h1>
+
     </div>
 
+
     <div class="card">
+
       <h3>Network Alerts</h3>
-      <h1>52</h1>
+
+      <h1 id="alerts">
+        0
+      </h1>
+
     </div>
 
   </div>
 
+
+  <!-- =========================
+       AI RECOMMENDATION
+  ========================= -->
+
   <div class="result-box">
 
-    <h2>🤖 AI Attack Recommendation System</h2>
+    <h2>
+      🤖 AI Attack Recommendation System
+    </h2>
 
-    <input id="q" placeholder="Describe security issue...">
+    <input
+      id="q"
+      placeholder="Describe security issue..."
+    >
 
-    <button onclick="ask()">Analyze Threat</button>
+    <button onclick="ask()">
+      Analyze Threat
+    </button>
+
+    <br><br>
 
     <div id="res"></div>
 
   </div>
 
+
+  <!-- =========================
+       REALTIME ALERTS
+  ========================= -->
+
+  <div class="result-box">
+
+    <h2>
+      🚨 Live Threat Feed
+    </h2>
+
+    <div id="feed"></div>
+
+  </div>
+
 </div>
 
+
+
+<!-- =========================
+     SOCKET.IO
+========================= -->
+
+<script src="/socket.io/socket.io.js"></script>
+
+
 <script>
-function ask(){
 
- fetch('/ask', {
-   method:'POST',
-   headers:{
-     'Content-Type':'application/json'
-   },
-   body:JSON.stringify({
-     question:document.getElementById('q').value
-   })
- })
- .then(r=>r.json())
- .then(d=>{
+/* =========================
+   LIVE COUNTERS
+========================= */
 
-   document.getElementById('res').innerHTML=`
+let totalIncidents = 0;
 
-   <div class="card">
+let criticalThreats = 0;
 
-   <h3>Attack Detected</h3>
-   <p><b>${d.attack}</b></p>
+let networkAlerts = 0;
 
-   <br>
 
-   <h3>Recommended Tool</h3>
-   <p>${d.tool}</p>
+/* =========================
+   UPDATE UI COUNTERS
+========================= */
 
-   <br>
+function updateStats() {
 
-   <h3>Solution</h3>
-   <p>${d.solution}</p>
+  document.getElementById("incidents").innerText =
+    totalIncidents;
 
-   </div>
+  document.getElementById("critical").innerText =
+    criticalThreats;
 
-   `;
-
- })
+  document.getElementById("alerts").innerText =
+    networkAlerts;
 }
+
+
+/* =========================
+   AI ANALYZER
+========================= */
+
+function ask() {
+
+  let question =
+    document.getElementById("q").value;
+
+  fetch('/ask', {
+
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      question
+    })
+
+  })
+
+  .then(r => r.json())
+
+  .then(data => {
+
+    let resultsHTML = "";
+
+    data.forEach(d => {
+
+      resultsHTML += `
+
+        <div class="card">
+
+          <h3>🚨 Attack Detected</h3>
+
+          <p>
+            <b>${d.attack}</b>
+          </p>
+
+          <br>
+
+          <h3>Severity</h3>
+
+          <p>${d.severity}</p>
+
+          <br>
+
+          <h3>Recommended Tool</h3>
+
+          <p>${d.tool}</p>
+
+          <br>
+
+          <h3>Solution</h3>
+
+          <p>${d.solution}</p>
+
+          <br>
+
+          <h3>Confidence</h3>
+
+          <p>${d.confidence}</p>
+
+        </div>
+
+      `;
+
+    });
+
+    document.getElementById("res").innerHTML =
+      resultsHTML;
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+    document.getElementById("res").innerHTML = `
+
+      <div class="card">
+
+        <h3>❌ Error</h3>
+
+        <p>Failed to analyze threat.</p>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+
+/* =========================
+   REALTIME SOCKET
+========================= */
+
+const socket = io();
+
+
+socket.on("connect", () => {
+
+  console.log("🟢 Connected to realtime SOC server");
+
+});
+
+
+socket.on("new-threat", (data) => {
+
+  console.log("🚨 Live Threat:", data);
+
+
+  /* =========================
+     UPDATE COUNTERS
+  ========================= */
+
+  totalIncidents++;
+
+  networkAlerts++;
+
+  if (
+    data.severity === "HIGH"
+  ) {
+    criticalThreats++;
+  }
+
+  updateStats();
+
+
+  /* =========================
+     LIVE FEED
+  ========================= */
+
+  document.getElementById("feed").innerHTML = `
+
+    <div class="card">
+
+      <h3>🚨 ${data.attack}</h3>
+
+      <p>
+        Severity:
+        <b>${data.severity}</b>
+      </p>
+
+      <p>
+        Confidence:
+        ${data.confidence}
+      </p>
+
+      <p>
+        Time:
+        ${new Date(data.time).toLocaleString()}
+      </p>
+
+    </div>
+
+  ` + document.getElementById("feed").innerHTML;
+
+});
+
+
+/* =========================
+   INITIAL UI LOAD
+========================= */
+
+updateStats();
+
 </script>
 
 </body>
