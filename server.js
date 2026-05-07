@@ -2,166 +2,157 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-const session = require("express-session");
-const path = require("path");
+const jwt = require("jsonwebtoken");
+const http = require("http");
+const socketIo = require("socket.io");
 
 const app = express();
-
-
-/* =========================
-   🔐 MIDDLEWARE
-========================= */
+const server = http.createServer(app);
+const io = socketIo(server);
 
 app.use(express.json());
+app.use(express.static("public"));
 
-app.use(express.urlencoded({
-  extended: true
-}));
+/* ================= DB ================= */
+mongoose.connect("mongodb://127.0.0.1:27017/soc_master");
 
+const Log = mongoose.model("Log", {
+  user: String,
+  type: String,
+  severity: String,
+  time: Date
+});
 
-/* =========================
-   🔑 SESSION
-========================= */
+/* ================= AUTH ================= */
+function auth(req,res,next){
+  const token = req.headers.authorization;
+  if(!token) return res.status(401).send("No token");
 
-app.use(session({
+  try{
+    req.user = jwt.verify(token.split(" ")[1], "SECRET");
+    next();
+  }catch(e){
+    res.status(401).send("Invalid token");
+  }
+}
 
-  secret: process.env.SESSION_SECRET || "soc_secret_key",
+/* ================= AI ENGINE ================= */
+app.post("/ask", auth, (req,res)=>{
 
-  resave: false,
+  const q = req.body.question.toLowerCase();
 
-  saveUninitialized: false,
+  let result = [];
 
-  cookie: {
+  function emit(type, severity){
 
-    httpOnly: true,
+    io.emit("soc_event", {
+      user: req.user.username,
+      type,
+      severity,
+      time: new Date()
+    });
 
-    secure: false,
-
-    maxAge: 1000 * 60 * 60
+    Log.create({
+      user: req.user.username,
+      type,
+      severity,
+      time: new Date()
+    });
 
   }
 
-}));
+  if(q.includes("sql")){
+    result.push({
+      attack:"SQL Injection",
+      severity:"HIGH",
+      tool:"SQLMap",
+      solution:"Use prepared statements",
+      confidence:"90%"
+    });
+    emit("SQL Injection","HIGH");
+  }
 
+  else if(q.includes("xss")){
+    result.push({
+      attack:"XSS Attack",
+      severity:"MEDIUM",
+      tool:"Burp Suite",
+      solution:"Sanitize input + CSP",
+      confidence:"85%"
+    });
+    emit("XSS Attack","MEDIUM");
+  }
 
-/* =========================
-   🌐 STATIC FILES
-========================= */
+  else if(q.includes("ddos")){
+    result.push({
+      attack:"DDoS Attack",
+      severity:"CRITICAL",
+      tool:"Cloudflare",
+      solution:"Rate limiting + CDN",
+      confidence:"95%"
+    });
+    emit("DDoS Attack","CRITICAL");
+  }
 
-app.use(express.static(
-  path.join(__dirname, "public")
-));
+  else{
+    result.push({
+      attack:"Unknown Threat",
+      severity:"LOW",
+      tool:"AI Engine",
+      solution:"Manual analysis required",
+      confidence:"70%"
+    });
+  }
 
-
-/* =========================
-   🗄️ MONGODB
-========================= */
-
-mongoose.connect(process.env.MONGO_URI)
-
-.then(() => {
-
-  console.log("✅ MongoDB Connected");
-
-})
-
-.catch((err) => {
-
-  console.error("❌ MongoDB Error");
-
-  console.error(err);
-
+  res.json(result);
 });
 
+/* ================= LAB ================= */
+app.post("/lab/run", auth, (req,res)=>{
 
-/* =========================
-   📦 ROUTES
-========================= */
+  const { type } = req.body;
 
-const authRoutes =
-  require("./routes/auth");
+  let severity = "LOW";
+  if(type==="sql") severity="HIGH";
+  if(type==="ddos") severity="CRITICAL";
+  if(type==="xss") severity="MEDIUM";
 
-const queryRoutes =
-  require("./routes/query");
+  const event = {
+    user:req.user.username,
+    type,
+    severity,
+    time:new Date()
+  };
 
-const logRoutes =
-  require("./routes/log");
+  Log.create(event);
+  io.emit("soc_event", event);
 
-
-app.use("/", authRoutes);
-
-app.use("/", queryRoutes);
-
-app.use("/", logRoutes);
-
-
-/* =========================
-   🧪 TEST ROUTE
-========================= */
-
-app.get("/test", (req, res) => {
-
-  res.json({
-
-    success: true,
-
-    message:
-      "🚀 SOC Lab Server Running"
-
-  });
-
+  res.json(event);
 });
 
+/* ================= STATS ================= */
+app.get("/stats", auth, async (req,res)=>{
 
-/* =========================
-   ❌ 404
-========================= */
+  const total = await Log.countDocuments();
+  const high = await Log.countDocuments({severity:"HIGH"});
+  const critical = await Log.countDocuments({severity:"CRITICAL"});
 
-app.use((req, res) => {
-
-  res.status(404).json({
-
-    success: false,
-
-    message: "Route not found"
-
-  });
-
+  res.json({total, high, critical});
 });
 
+/* ================= LOGS ================= */
+app.get("/logs", auth, async (req,res)=>{
 
-/* =========================
-   ⚠️ ERROR HANDLER
-========================= */
-
-app.use((err, req, res, next) => {
-
-  console.error("❌ SERVER ERROR");
-
-  console.error(err);
-
-  res.status(500).json({
-
-    success: false,
-
-    message: "Internal Server Error"
-
-  });
-
+  const logs = await Log.find().sort({time:-1}).limit(100);
+  res.json(logs);
 });
 
+/* ================= SOCKET ================= */
+io.on("connection", socket=>{
+  console.log("SOC analyst connected");
+});
 
-/* =========================
-   🚀 START SERVER
-========================= */
-
-const PORT =
-  process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-
-  console.log(
-    `🔥 Server running at http://localhost:${PORT}`
-  );
-
+/* ================= START ================= */
+server.listen(3000, ()=>{
+  console.log("MASTER SOC RUNNING");
 });
