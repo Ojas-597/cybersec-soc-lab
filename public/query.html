@@ -1,47 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ask SOC</title>
+  <title>AI Query Analysis</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>📡 Ask SOC</h2>
+<div class="navbar">
 
-<input id="q" placeholder="Describe your issue..." style="width:300px;">
-<button onclick="ask()">Analyze</button>
+  <div class="logo">
+    🤖 AI Security Analysis
+  </div>
 
-<div id="res"></div>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Knowledge Base</a>
+    <a href="logs.html">Logs</a>
+    <a href="/logout">Logout</a>
+  </div>
+
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <h1>Describe Security Issue</h1>
+
+    <p>
+      Enter suspicious activity, attack symptoms,
+      or security concerns for AI-based analysis.
+    </p>
+
+    <br>
+
+    <input
+      id="q"
+      placeholder="Example: login bypass vulnerability"
+    >
+
+    <button onclick="ask()">
+      Analyze Threat
+    </button>
+
+  </div>
+
+  <div id="output"></div>
+
+</div>
 
 <script>
+
 function ask(){
+
  fetch('/ask', {
-   method: "POST",
-   headers: {"Content-Type":"application/json"},
-   body: JSON.stringify({
-     question: document.getElementById("q").value
+
+   method:'POST',
+
+   headers:{
+     'Content-Type':'application/json'
+   },
+
+   body:JSON.stringify({
+     question:document.getElementById('q').value
    })
+
  })
+
  .then(r=>r.json())
- .then(data=>{
 
-   let html = "<h3>🔍 Analysis Result</h3>";
+ .then(d=>{
 
-   data.forEach(d => {
-     html += `
-       <div style="border:1px solid white; padding:10px; margin:10px;">
-         <b>Attack:</b> ${d.attack}<br>
-         <b>Confidence:</b> ${d.confidence}<br>
-         <b>Tool:</b> ${d.tool}<br>
-         <b>Solution:</b> ${d.solution}<br>
-         <a href="lab.html?attack=${d.attack}">▶ Simulate Attack</a>
-       </div>
-     `;
-   });
+   document.getElementById('output').innerHTML = `
 
-   document.getElementById("res").innerHTML = html;
- });
+   <div class="result-box">
+
+   <h2>🚨 Threat Analysis Result</h2>
+
+   <br>
+
+   <h3>Detected Attack</h3>
+   <p>${d.attack}</p>
+
+   <br>
+
+   <h3>Recommended Tool</h3>
+   <p>${d.tool}</p>
+
+   <br>
+
+   <h3>Suggested Solution</h3>
+   <p>${d.solution}</p>
+
+   <br>
+
+   <span class="badge">
+     AI Recommendation Generated
+   </span>
+
+   </div>
+
+   `;
+
+ })
+
 }
+
 </script>
 
 </body>
