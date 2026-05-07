@@ -1,355 +1,142 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
   <title>SOC Dashboard</title>
-
   <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
-
-  <div class="logo">
-    📊 SOC Dashboard
-  </div>
+  <div class="logo">📊 SOC Dashboard</div>
 
   <div class="nav-links">
-
-    <a href="search.html">
-      Search
-    </a>
-
-    <a href="logs.html" id="logsLink">
-      Logs
-    </a>
-
-    <a href="quiz.html">
-      Quiz
-    </a>
-
-    <a href="/logout">
-      Logout
-    </a>
-
+    <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Search</a>
+    <a href="lab.html">Lab</a>
+    <a href="report.html">Report</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="upload.html" id="uploadLink">Upload</a>
+    <a href="logs.html" id="logsLink">Logs</a>
+    <a href="/logout">Logout</a>
   </div>
-
 </div>
-
 
 <div class="container">
 
-  <h1>
-    Welcome to SOC Monitoring Center
-  </h1>
+<h1>📊 SOC Monitoring Dashboard</h1>
 
+<!-- STATS -->
+<div class="card-grid">
 
-  <!-- =========================
-       STATS
-  ========================= -->
-
-  <div class="card-grid">
-
-    <div class="card">
-
-      <h3>Total Incidents</h3>
-
-      <h1 id="incidents">
-        0
-      </h1>
-
-    </div>
-
-
-    <div class="card">
-
-      <h3>Critical Threats</h3>
-
-      <h1 id="critical">
-        0
-      </h1>
-
-    </div>
-
-
-    <div class="card">
-
-      <h3>Network Alerts</h3>
-
-      <h1 id="alerts">
-        0
-      </h1>
-
-    </div>
-
+  <div class="card">
+    <h3>Total Incidents</h3>
+    <h1 id="incidents">0</h1>
   </div>
 
-
-  <!-- =========================
-       AI ANALYZER
-  ========================= -->
-
-  <div class="result-box">
-
-    <h2>
-      🤖 AI Attack Recommendation System
-    </h2>
-
-    <input
-      id="q"
-      placeholder="Describe security issue..."
-    >
-
-    <button onclick="ask()">
-      Analyze Threat
-    </button>
-
-    <br><br>
-
-    <div id="res"></div>
-
+  <div class="card">
+    <h3>Critical Threats</h3>
+    <h1 id="critical">0</h1>
   </div>
 
-
-  <!-- =========================
-       THREAT FEED
-  ========================= -->
-
-  <div class="result-box">
-
-    <h2>
-      🚨 Threat Feed
-    </h2>
-
-    <div id="feed"></div>
-
+  <div class="card">
+    <h3>Network Alerts</h3>
+    <h1 id="alerts">0</h1>
   </div>
 
 </div>
 
+<!-- AI ANALYZER -->
+<div class="result-box">
 
+<h2>🤖 AI Threat Analyzer</h2>
+
+<input id="q" placeholder="Describe security issue...">
+<button onclick="ask()">Analyze</button>
+
+<div id="res"></div>
+
+</div>
+
+</div>
 
 <script>
 
-/* =========================
-   ROLE CHECK
-========================= */
-
+// AUTH + ROLE CONTROL
 fetch("/me")
+.then(r=>r.json())
+.then(data=>{
 
-.then(res => res.json())
-
-.then(data => {
-
-  if (!data.loggedIn) {
-
-    window.location.href =
-      "/login.html";
-
+  if(!data.loggedIn){
+    window.location.href="/login.html";
     return;
-
   }
 
+  const role = data.user.role;
 
-  const role =
-    data.user.role;
+  // hide upload for non-admin
+  if(role !== "admin"){
+    const up = document.getElementById("uploadLink");
+    if(up) up.style.display="none";
+  }
 
-
-  console.log(
-    "Logged in as:",
-    role
-  );
-
-
-  /* =========================
-     USER RESTRICTIONS
-  ========================= */
-
-  if (role === "user") {
-
-    document
-      .getElementById("logsLink")
-      .style.display = "none";
-
+  // hide logs for normal users
+  if(role === "user"){
+    const logs = document.getElementById("logsLink");
+    if(logs) logs.style.display="none";
   }
 
 });
 
+// STATS
+let total=0, critical=0, alerts=0;
 
-/* =========================
-   COUNTERS
-========================= */
-
-let totalIncidents = 0;
-
-let criticalThreats = 0;
-
-let networkAlerts = 0;
-
-
-/* =========================
-   UPDATE STATS
-========================= */
-
-function updateStats() {
-
-  document.getElementById("incidents")
-    .innerText = totalIncidents;
-
-  document.getElementById("critical")
-    .innerText = criticalThreats;
-
-  document.getElementById("alerts")
-    .innerText = networkAlerts;
-
+function update(){
+  document.getElementById("incidents").innerText=total;
+  document.getElementById("critical").innerText=critical;
+  document.getElementById("alerts").innerText=alerts;
 }
 
+// AI ANALYZER
+function ask(){
 
-/* =========================
-   AI ANALYZER
-========================= */
+  let question = document.getElementById("q").value;
 
-function ask() {
-
-  let question =
-    document.getElementById("q").value;
-
-
-  fetch("/ask", {
-
-    method: "POST",
-
-    headers: {
-
-      "Content-Type":
-        "application/json"
-
-    },
-
-    body: JSON.stringify({
-
-      question
-
-    })
-
+  fetch("/ask",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({question})
   })
+  .then(r=>r.json())
+  .then(data=>{
 
-  .then(res => res.json())
+    let html="";
 
-  .then(data => {
-
-    let html = "";
-
-
-    data.forEach(d => {
+    data.forEach(d=>{
 
       html += `
-
         <div class="card">
-
-          <h3>
-            🚨 ${d.attack}
-          </h3>
-
-          <p>
-
-            <b>Severity:</b>
-
-            ${d.severity}
-
-          </p>
-
-          <p>
-
-            <b>Tool:</b>
-
-            ${d.tool}
-
-          </p>
-
-          <p>
-
-            <b>Solution:</b>
-
-            ${d.solution}
-
-          </p>
-
-          <p>
-
-            <b>Confidence:</b>
-
-            ${d.confidence}
-
-          </p>
-
+          <h3>🚨 ${d.attack}</h3>
+          <p><b>Severity:</b> ${d.severity}</p>
+          <p><b>Tool:</b> ${d.tool}</p>
+          <p><b>Solution:</b> ${d.solution}</p>
         </div>
-
       `;
 
-
-      totalIncidents++;
-
-      networkAlerts++;
-
-
-      if (
-        d.severity === "HIGH"
-      ) {
-
-        criticalThreats++;
-
-      }
+      total++;
+      alerts++;
+      if(d.severity==="HIGH") critical++;
 
     });
 
-
-    updateStats();
-
-
-    document.getElementById("res")
-      .innerHTML = html;
-
-
-    document.getElementById("feed")
-      .innerHTML = html +
-      document.getElementById("feed")
-      .innerHTML;
-
-  })
-
-  .catch(err => {
-
-    console.error(err);
-
-    document.getElementById("res")
-      .innerHTML = `
-
-      <div class="card">
-
-        <h3>❌ Error</h3>
-
-        <p>
-          Failed to analyze threat
-        </p>
-
-      </div>
-
-    `;
+    update();
+    document.getElementById("res").innerHTML = html;
 
   });
 
 }
 
-
-/* =========================
-   INITIAL LOAD
-========================= */
-
-updateStats();
+update();
 
 </script>
 
