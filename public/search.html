@@ -1,51 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
+
   <title>Search Vulnerabilities</title>
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
 <div class="container">
 
-<h1>🔍 Search Vulnerability</h1>
+  <h1>🔍 Search Vulnerabilities</h1>
 
-<input placeholder="Search vulnerability..." id="search" onkeyup="search()">
+  <input
+    placeholder="Search vulnerability..."
+    id="search"
+    onkeyup="searchAttack()"
+  >
 
-<div id="results" class="card-grid"></div>
+  <div id="results" class="card-grid"></div>
 
 </div>
 
 <script>
 
 const attacks = [
-  "SQL Injection",
-  "XSS",
-  "Nmap",
-  "Phishing",
-  "Wireshark",
-  "Spoofing"
+
+  {
+    name: "SQL Injection",
+    severity: "HIGH",
+    tool: "SQLmap"
+  },
+
+  {
+    name: "XSS",
+    severity: "MEDIUM",
+    tool: "Burp Suite"
+  },
+
+  {
+    name: "Phishing",
+    severity: "HIGH",
+    tool: "SET Toolkit"
+  },
+
+  {
+    name: "Port Scanning",
+    severity: "MEDIUM",
+    tool: "Nmap"
+  },
+
+  {
+    name: "Wireshark",
+    severity: "LOW",
+    tool: "Wireshark"
+  },
+
+  {
+    name: "Spoofing",
+    severity: "HIGH",
+    tool: "Ettercap"
+  }
+
 ];
 
-function search() {
 
- let q = document.getElementById("search").value;
+/* =========================
+   SEARCH
+========================= */
 
- let res = attacks.filter(a =>
-   a.toLowerCase().includes(q.toLowerCase())
- );
+function searchAttack() {
 
- document.getElementById("results").innerHTML =
- res.map(r => `
+  let q =
+    document.getElementById("search")
+    .value
+    .toLowerCase();
 
- <div class="card">
-   <h3>${r}</h3>
-   <a href="lab.html?attack=${r}">
-     <button>Open Lab</button>
-   </a>
- </div>
 
- `).join("");
+  let res = attacks.filter(a =>
+
+    a.name.toLowerCase().includes(q)
+
+  );
+
+
+  document.getElementById("results").innerHTML =
+
+    res.map(r => `
+
+      <div class="card">
+
+        <h3>${r.name}</h3>
+
+        <p>
+          Severity:
+          <b>${r.severity}</b>
+        </p>
+
+        <p>
+          Tool:
+          ${r.tool}
+        </p>
+
+        <br>
+
+        <a href="lab.html?attack=${encodeURIComponent(r.name)}">
+
+          <button>
+            Open Lab
+          </button>
+
+        </a>
+
+      </div>
+
+    `).join("");
+
 }
 
 </script>
