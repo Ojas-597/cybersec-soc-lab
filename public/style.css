@@ -1,46 +1,72 @@
-body {
-  background: #0f172a;
-  color: #e2e8f0;
-  font-family: Arial;
-  padding: 20px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, sans-serif;
 }
 
-h1, h2, h3 {
-  color: #38bdf8;
+body{
+  background: linear-gradient(135deg,#dbeafe,#fce7f3);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-a {
-  color: #22c55e;
-  text-decoration: none;
+.container{
+  width:400px;
+  background:white;
+  padding:40px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
 }
 
-input, select {
-  padding: 10px;
-  margin: 5px 0;
-  width: 250px;
-  border-radius: 5px;
-  border: none;
+h1,h2{
+  text-align:center;
+  margin-bottom:20px;
+  color:#333;
 }
 
-button {
-  padding: 10px;
-  margin-top: 10px;
-  background: #38bdf8;
-  color: black;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  font-size:15px;
 }
 
-.card {
-  border: 1px solid #334155;
-  padding: 20px;
-  border-radius: 10px;
-  background: #1e293b;
-  width: fit-content;
+button{
+  width:100%;
+  padding:12px;
+  margin-top:20px;
+  border:none;
+  border-radius:10px;
+  background:#6366f1;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
 }
 
-#msg {
-  margin-top: 10px;
-  font-weight: bold;
+button:hover{
+  background:#4f46e5;
+}
+
+a{
+  text-decoration:none;
+  color:#6366f1;
+}
+
+.links{
+  text-align:center;
+  margin-top:15px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  margin-top:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
