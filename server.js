@@ -5,15 +5,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
 
-const http = require("http");
-const { Server } = require("socket.io");
-
-
 const app = express();
-
-const server = http.createServer(app);
-
-const io = new Server(server);
 
 
 /* =========================
@@ -33,7 +25,7 @@ app.use(express.urlencoded({
 
 app.use(session({
 
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || "soc_secret_key",
 
   resave: false,
 
@@ -62,7 +54,7 @@ app.use(express.static(
 
 
 /* =========================
-   🗄️ DATABASE
+   🗄️ MONGODB
 ========================= */
 
 mongoose.connect(process.env.MONGO_URI)
@@ -75,47 +67,36 @@ mongoose.connect(process.env.MONGO_URI)
 
 .catch((err) => {
 
-  console.error("❌ MongoDB Error:");
+  console.error("❌ MongoDB Error");
+
   console.error(err);
 
 });
 
 
 /* =========================
-   📡 SOCKET.IO
-========================= */
-
-io.on("connection", (socket) => {
-
-  console.log("🟢 Client Connected");
-
-  socket.on("disconnect", () => {
-
-    console.log("🔴 Client Disconnected");
-
-  });
-
-});
-
-
-app.set("io", io);
-
-
-/* =========================
    📦 ROUTES
 ========================= */
 
-const authRoutes = require("./routes/auth");
-const queryRoutes = require("./routes/query");
-const logRoutes = require("./routes/log");
+const authRoutes =
+  require("./routes/auth");
+
+const queryRoutes =
+  require("./routes/query");
+
+const logRoutes =
+  require("./routes/log");
+
 
 app.use("/", authRoutes);
+
 app.use("/", queryRoutes);
+
 app.use("/", logRoutes);
 
 
 /* =========================
-   🧪 TEST
+   🧪 TEST ROUTE
 ========================= */
 
 app.get("/test", (req, res) => {
@@ -124,7 +105,46 @@ app.get("/test", (req, res) => {
 
     success: true,
 
-    message: "🚀 SOC Lab Running"
+    message:
+      "🚀 SOC Lab Server Running"
+
+  });
+
+});
+
+
+/* =========================
+   ❌ 404
+========================= */
+
+app.use((req, res) => {
+
+  res.status(404).json({
+
+    success: false,
+
+    message: "Route not found"
+
+  });
+
+});
+
+
+/* =========================
+   ⚠️ ERROR HANDLER
+========================= */
+
+app.use((err, req, res, next) => {
+
+  console.error("❌ SERVER ERROR");
+
+  console.error(err);
+
+  res.status(500).json({
+
+    success: false,
+
+    message: "Internal Server Error"
 
   });
 
@@ -135,9 +155,10 @@ app.get("/test", (req, res) => {
    🚀 START SERVER
 ========================= */
 
-const PORT = process.env.PORT || 3000;
+const PORT =
+  process.env.PORT || 3000;
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
 
   console.log(
     `🔥 Server running at http://localhost:${PORT}`
