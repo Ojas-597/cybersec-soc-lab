@@ -6,36 +6,47 @@
 </head>
 <body>
 
-<h2>📊 SOC Logs</h2>
+<div class="container">
 
-<ul id="logs"></ul>
+<h1>📡 SOC Logs</h1>
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Level</th>
+<th>Message</th>
+</tr>
+</thead>
+
+<tbody id="logs"></tbody>
+
+</table>
+
+</div>
 
 <script>
 
-// 🔐 role check
-fetch('/me')
-.then(r=>r.json())
-.then(u=>{
-  if(!u || !["admin","analyst"].includes(u.role)){
-    alert("Access denied");
-    window.location="dashboard.html";
-  }
-});
-
-// 📡 fetch logs
 fetch('/logs')
 .then(r=>r.json())
 .then(data=>{
- let list = document.getElementById("logs");
+
+ let logs = document.getElementById('logs');
 
  data.forEach(l=>{
-   let li = document.createElement("li");
 
-   li.innerText = `[${l.level}] ${l.message} (${new Date(l.time).toLocaleString()})`;
+ logs.innerHTML += `
 
-   list.appendChild(li);
- });
-});
+ <tr>
+   <td><span class="badge">${l.level}</span></td>
+   <td>${l.message}</td>
+ </tr>
+
+ `;
+
+ })
+
+})
 
 </script>
 
