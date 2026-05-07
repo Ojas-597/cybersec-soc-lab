@@ -1,4 +1,4 @@
-require("dotenv").config(); // 🔐 Load environment variables
+require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -7,37 +7,75 @@ const path = require("path");
 
 const app = express();
 
+
 /* =========================
    🔐 MIDDLEWARE
 ========================= */
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(express.urlencoded({
+  extended: true
+}));
+
+
+/* =========================
+   🔑 SESSION
+========================= */
 
 app.use(session({
-  secret: process.env.SESSION_SECRET, // 🔐 from .env
+
+  secret: process.env.SESSION_SECRET,
+
   resave: false,
+
   saveUninitialized: false,
+
   cookie: {
+
     httpOnly: true,
-    secure: false // set true if using HTTPS
+
+    secure: false, // true only with HTTPS
+
+    maxAge: 1000 * 60 * 60 // 1 hour
   }
+
 }));
+
 
 /* =========================
    🌐 STATIC FILES
 ========================= */
-app.use(express.static(path.join(__dirname, "public")));
+
+app.use(express.static(
+  path.join(__dirname, "public")
+));
+
 
 /* =========================
-   🗄️ MONGODB CONNECTION
+   🗄️ DATABASE
 ========================= */
+
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("✅ MongoDB Connected"))
-.catch(err => console.log("❌ MongoDB Error:", err));
+
+.then(() => {
+
+  console.log("✅ MongoDB Connected");
+
+})
+
+.catch((err) => {
+
+  console.error("❌ MongoDB Error:");
+  console.error(err);
+
+});
+
 
 /* =========================
    📦 ROUTES
 ========================= */
+
 const authRoutes = require("./routes/auth");
 const queryRoutes = require("./routes/query");
 const logRoutes = require("./routes/log");
@@ -46,26 +84,62 @@ app.use("/", authRoutes);
 app.use("/", queryRoutes);
 app.use("/", logRoutes);
 
+
 /* =========================
    🧪 HEALTH CHECK
 ========================= */
+
 app.get("/test", (req, res) => {
-  res.send("🚀 SOC Lab Server Running");
+
+  res.json({
+    success: true,
+    message: "🚀 SOC Lab Server Running"
+  });
+
 });
 
+
 /* =========================
-   ⚠️ ERROR HANDLER
+   ❌ 404 HANDLER
 ========================= */
-app.use((err, req, res, next) => {
-  console.error("❌ Error:", err);
-  res.status(500).send("Internal Server Error");
+
+app.use((req, res) => {
+
+  res.status(404).json({
+    success: false,
+    message: "Route not found"
+  });
+
 });
+
+
+/* =========================
+   ⚠️ GLOBAL ERROR HANDLER
+========================= */
+
+app.use((err, req, res, next) => {
+
+  console.error("❌ SERVER ERROR:");
+  console.error(err);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error"
+  });
+
+});
+
 
 /* =========================
    🚀 START SERVER
 ========================= */
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🔥 Server running at http://localhost:${PORT}`);
+
+  console.log(
+    `🔥 Server running at http://localhost:${PORT}`
+  );
+
 });
