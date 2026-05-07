@@ -5,14 +5,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
 
-const http = require("http");
-const { Server } = require("socket.io");
-
 const app = express();
-
-const server = http.createServer(app);
-
-const io = new Server(server);
 
 
 /* =========================
@@ -39,9 +32,13 @@ app.use(session({
   saveUninitialized: false,
 
   cookie: {
+
     httpOnly: true,
+
     secure: false,
+
     maxAge: 1000 * 60 * 60
+
   }
 
 }));
@@ -63,30 +60,17 @@ app.use(express.static(
 mongoose.connect(process.env.MONGO_URI)
 
 .then(() => {
+
   console.log("✅ MongoDB Connected");
+
 })
 
 .catch((err) => {
+
   console.error("❌ MongoDB Error:");
   console.error(err);
-});
-
-
-/* =========================
-   📡 SOCKET.IO
-========================= */
-
-io.on("connection", (socket) => {
-
-  console.log("🟢 User connected");
-
-  socket.on("disconnect", () => {
-    console.log("🔴 User disconnected");
-  });
 
 });
-
-app.set("io", io);
 
 
 /* =========================
@@ -103,45 +87,17 @@ app.use("/", logRoutes);
 
 
 /* =========================
-   🧪 HEALTH CHECK
+   🧪 TEST ROUTE
 ========================= */
 
 app.get("/test", (req, res) => {
 
   res.json({
+
     success: true,
-    message: "🚀 SOC Lab Server Running"
-  });
 
-});
+    message: "🚀 SOC Lab Running"
 
-
-/* =========================
-   ❌ 404
-========================= */
-
-app.use((req, res) => {
-
-  res.status(404).json({
-    success: false,
-    message: "Route not found"
-  });
-
-});
-
-
-/* =========================
-   ⚠️ ERROR HANDLER
-========================= */
-
-app.use((err, req, res, next) => {
-
-  console.error("❌ SERVER ERROR:");
-  console.error(err);
-
-  res.status(500).json({
-    success: false,
-    message: "Internal Server Error"
   });
 
 });
@@ -151,9 +107,9 @@ app.use((err, req, res, next) => {
    🚀 START SERVER
 ========================= */
 
-const PORT = 5000;
+const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
 
   console.log(
     `🔥 Server running at http://localhost:${PORT}`
