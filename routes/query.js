@@ -124,24 +124,6 @@ router.post("/ask", isAuth, async (req, res) => {
     });
 
 
-    /* =========================
-       📡 REALTIME ALERT
-    ========================= */
-
-    const io = req.app.get("io");
-
-    io.emit("new-threat", {
-
-      attack: results[0].attack,
-
-      severity: results[0].severity,
-
-      confidence: results[0].confidence,
-
-      time: new Date()
-
-    });
-
 
     /* =========================
        ✅ RESPONSE
