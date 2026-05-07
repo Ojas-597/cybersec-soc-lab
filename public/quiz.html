@@ -12,31 +12,112 @@
 
 <h1>🧠 Cybersecurity Quiz</h1>
 
+<!-- QUESTION 1 -->
+<div class="quiz-box">
+
 <h3>
-Q: What tool is used for port scanning?
+1️⃣ What tool is used for port scanning?
 </h3>
 
-<button onclick="check('A')">A) Nmap</button>
-<button onclick="check('B')">B) Wireshark</button>
+<button onclick="check(this,'A','A')">A) Nmap</button>
+<button onclick="check(this,'B','A')">B) Wireshark</button>
 
-<h2 id="result"></h2>
+<p class="result"></p>
+
+</div>
+
+<hr><br>
+
+<!-- QUESTION 2 -->
+<div class="quiz-box">
+
+<h3>
+2️⃣ Which attack tries to steal user credentials using fake websites?
+</h3>
+
+<button onclick="check(this,'A','B')">A) SQL Injection</button>
+<button onclick="check(this,'B','B')">B) Phishing</button>
+
+<p class="result"></p>
+
+</div>
+
+<hr><br>
+
+<!-- QUESTION 3 -->
+<div class="quiz-box">
+
+<h3>
+3️⃣ Which tool is used for packet analysis?
+</h3>
+
+<button onclick="check(this,'A','B')">A) Burp Suite</button>
+<button onclick="check(this,'B','B')">B) Wireshark</button>
+
+<p class="result"></p>
+
+</div>
+
+<hr><br>
+
+<!-- QUESTION 4 -->
+<div class="quiz-box">
+
+<h3>
+4️⃣ SQL Injection mainly targets:
+</h3>
+
+<button onclick="check(this,'A','A')">A) Databases</button>
+<button onclick="check(this,'B','A')">B) Hardware</button>
+
+<p class="result"></p>
+
+</div>
+
+<hr><br>
+
+<!-- QUESTION 5 -->
+<div class="quiz-box">
+
+<h3>
+5️⃣ Which tool is commonly used for web vulnerability testing?
+</h3>
+
+<button onclick="check(this,'A','A')">A) Burp Suite</button>
+<button onclick="check(this,'B','A')">B) Photoshop</button>
+
+<p class="result"></p>
+
+</div>
 
 </div>
 
 </div>
 
 <script>
-function check(a){
 
- if(a==='A'){
-   document.getElementById('result').innerText='✔ Correct';
+function check(btn, selected, correct){
+
+ let result =
+ btn.parentElement.querySelector(".result");
+
+ if(selected === correct){
+
+   result.innerText = "✔ Correct";
+   result.style.color = "green";
+
  }
  else{
-   document.getElementById('result').innerText='❌ Wrong';
+
+   result.innerText = "❌ Wrong";
+   result.style.color = "red";
+
  }
 
 }
+
 </script>
 
 </body>
 </html>
+
