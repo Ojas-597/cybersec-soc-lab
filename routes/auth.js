@@ -1,8 +1,10 @@
 const express = require("express");
+
 const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
-// const Log = require("../models/Logs"); // TEMPORARILY DISABLED
+
+const Log = require("../models/Logs");
 
 const router = express.Router();
 
@@ -10,53 +12,112 @@ const router = express.Router();
 /* =========================
    📝 SIGNUP
 ========================= */
+
 router.post("/signup", async (req, res) => {
 
   try {
 
-    const { username, password, role } = req.body;
+    const {
+      username,
+      password,
+      role
+    } = req.body;
 
-    // Validation
+
+    /* =========================
+       VALIDATION
+    ========================= */
+
     if (!username || !password) {
-      return res.send("All fields required");
+
+      return res.status(400).send(
+        "All fields required"
+      );
+
     }
 
-    // Check existing user
-    const exists = await User.findOne({ username });
+
+    /* =========================
+       CHECK EXISTING USER
+    ========================= */
+
+    const exists = await User.findOne({
+      username
+    });
+
 
     if (exists) {
-      return res.send("User already exists");
+
+      return res.status(400).send(
+        "User already exists"
+      );
+
     }
 
-    // Hash password
-    const hash = await bcrypt.hash(password, 10);
 
-    // Create user
+    /* =========================
+       HASH PASSWORD
+    ========================= */
+
+    const hash = await bcrypt.hash(
+      password,
+      10
+    );
+
+
+    /* =========================
+       CREATE USER
+    ========================= */
+
     const newUser = await User.create({
+
       username,
+
       password: hash,
+
       role: role || "user"
+
     });
 
-    console.log("✅ User created:", newUser.username);
 
-    // TEMPORARILY DISABLED
-    /*
+    console.log(
+      "✅ User created:",
+      newUser.username
+    );
+
+
+    /* =========================
+       CREATE LOG
+    ========================= */
+
     await Log.create({
-      message: `New user registered: ${username}`,
-      level: "INFO"
-    });
-    */
 
-    // Redirect to login
+      message:
+        `New user registered: ${username}`,
+
+      level: "INFO"
+
+    });
+
+
+    /* =========================
+       REDIRECT
+    ========================= */
+
     res.redirect("/login.html");
 
   } catch (err) {
 
-    console.error("❌ SIGNUP ERROR:");
+    console.error(
+      "❌ SIGNUP ERROR:"
+    );
+
     console.error(err);
 
-    res.status(500).send(err.message);
+    res.status(500).send(
+      err.message
+    );
+
   }
 
 });
@@ -65,52 +126,107 @@ router.post("/signup", async (req, res) => {
 /* =========================
    🔐 LOGIN
 ========================= */
+
 router.post("/login", async (req, res) => {
 
   try {
 
-    const { username, password } = req.body;
+    const {
+      username,
+      password
+    } = req.body;
 
-    // Find user
-    const user = await User.findOne({ username });
+
+    /* =========================
+       FIND USER
+    ========================= */
+
+    const user = await User.findOne({
+      username
+    });
+
 
     if (!user) {
-      return res.send("User not found");
+
+      return res.status(404).send(
+        "User not found"
+      );
+
     }
 
-    // Compare password
-    const ok = await bcrypt.compare(password, user.password);
+
+    /* =========================
+       CHECK PASSWORD
+    ========================= */
+
+    const ok = await bcrypt.compare(
+      password,
+      user.password
+    );
+
 
     if (!ok) {
-      return res.send("Wrong password");
+
+      return res.status(401).send(
+        "Wrong password"
+      );
+
     }
 
-    // Store session
+
+    /* =========================
+       SAVE SESSION
+    ========================= */
+
     req.session.user = {
+
       id: user._id,
+
       username: user.username,
+
       role: user.role
+
     };
 
-    console.log("✅ Login successful:", user.username);
 
-    // TEMPORARILY DISABLED
-    /*
+    console.log(
+      "✅ Login successful:",
+      user.username
+    );
+
+
+    /* =========================
+       LOGIN LOG
+    ========================= */
+
     await Log.create({
-      message: `User logged in: ${user.username}`,
-      level: "INFO"
-    });
-    */
 
-    // Redirect
+      message:
+        `User logged in: ${user.username}`,
+
+      level: "INFO"
+
+    });
+
+
+    /* =========================
+       REDIRECT
+    ========================= */
+
     res.redirect("/dashboard.html");
 
   } catch (err) {
 
-    console.error("❌ LOGIN ERROR:");
+    console.error(
+      "❌ LOGIN ERROR:"
+    );
+
     console.error(err);
 
-    res.status(500).send(err.message);
+    res.status(500).send(
+      err.message
+    );
+
   }
 
 });
@@ -119,16 +235,27 @@ router.post("/login", async (req, res) => {
 /* =========================
    🚪 LOGOUT
 ========================= */
+
 router.get("/logout", (req, res) => {
 
   req.session.destroy((err) => {
 
     if (err) {
-      console.error("❌ Logout Error:", err);
-      return res.send("Logout failed");
+
+      console.error(
+        "❌ Logout Error:"
+      );
+
+      console.error(err);
+
+      return res.send(
+        "Logout failed"
+      );
+
     }
 
     res.redirect("/login.html");
+
   });
 
 });
