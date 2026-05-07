@@ -1,15 +1,18 @@
 const express = require("express");
 
 const Query = require("../models/Query");
+
 const Log = require("../models/Logs");
 
-const { isAuth } = require("../middleware/auth");
+const {
+  isAuth
+} = require("../middleware/auth");
 
 const router = express.Router();
 
 
 /* =========================
-   🔍 AI THREAT ANALYZER
+   🤖 AI THREAT ANALYZER
 ========================= */
 
 router.post("/ask", isAuth, async (req, res) => {
@@ -37,7 +40,8 @@ router.post("/ask", isAuth, async (req, res) => {
 
     if (
       q.includes("login") ||
-      q.includes("bypass")
+      q.includes("bypass") ||
+      q.includes("sql")
     ) {
 
       results.push({
@@ -46,12 +50,13 @@ router.post("/ask", isAuth, async (req, res) => {
 
         severity: "HIGH",
 
-        tool: "Burp Suite / SQLmap",
+        tool:
+          "Burp Suite / SQLmap",
 
         solution:
           "Use prepared statements",
 
-        confidence: "80%"
+        confidence: "85%"
 
       });
 
@@ -59,26 +64,27 @@ router.post("/ask", isAuth, async (req, res) => {
 
 
     /* =========================
-       SNIFFING
+       PHISHING
     ========================= */
 
     if (
-      q.includes("slow") ||
-      q.includes("traffic")
+      q.includes("phishing") ||
+      q.includes("fake email")
     ) {
 
       results.push({
 
-        attack: "Sniffing",
+        attack: "Phishing",
 
-        severity: "MEDIUM",
+        severity: "HIGH",
 
-        tool: "Wireshark",
+        tool:
+          "SET Toolkit",
 
         solution:
-          "Analyze suspicious packets",
+          "User awareness training",
 
-        confidence: "60%"
+        confidence: "80%"
 
       });
 
@@ -91,7 +97,8 @@ router.post("/ask", isAuth, async (req, res) => {
 
     if (
       q.includes("port") ||
-      q.includes("open")
+      q.includes("open port") ||
+      q.includes("scan")
     ) {
 
       results.push({
@@ -113,25 +120,27 @@ router.post("/ask", isAuth, async (req, res) => {
 
 
     /* =========================
-       PHISHING
+       NETWORK TRAFFIC
     ========================= */
 
     if (
-      q.includes("phishing")
+      q.includes("traffic") ||
+      q.includes("slow") ||
+      q.includes("sniff")
     ) {
 
       results.push({
 
-        attack: "Phishing",
+        attack: "Packet Sniffing",
 
-        severity: "HIGH",
+        severity: "MEDIUM",
 
-        tool: "SET Toolkit",
+        tool: "Wireshark",
 
         solution:
-          "User awareness training",
+          "Monitor suspicious packets",
 
-        confidence: "75%"
+        confidence: "65%"
 
       });
 
@@ -153,7 +162,7 @@ router.post("/ask", isAuth, async (req, res) => {
         tool: "Nmap",
 
         solution:
-          "Perform deeper investigation",
+          "Perform detailed investigation",
 
         confidence: "40%"
 
@@ -187,7 +196,7 @@ router.post("/ask", isAuth, async (req, res) => {
     await Log.create({
 
       message:
-        `Threat detected for ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
+        `Threat analyzed for ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
 
       level:
         results[0].severity
@@ -195,45 +204,25 @@ router.post("/ask", isAuth, async (req, res) => {
     });
 
 
-    /* =========================
-       REALTIME ALERT
-    ========================= */
+    console.log(
+      `🚨 Threat detected: ${results[0].attack}`
+    );
 
-    const io = req.app.get("io");
-
-    io.emit("new-threat", {
-
-      attack:
-        results[0].attack,
-
-      severity:
-        results[0].severity,
-
-      confidence:
-        results[0].confidence,
-
-      time:
-        new Date()
-
-    });
-
-
-    /* =========================
-       RESPONSE
-    ========================= */
 
     res.json(results);
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(
-      "❌ QUERY ERROR:"
+      "❌ QUERY ERROR"
     );
 
     console.error(err);
 
     res.status(500).send(
-      err.message
+      "Server Error"
     );
 
   }
