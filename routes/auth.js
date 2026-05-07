@@ -2,104 +2,136 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
-const Log = require("../models/Logs");
+// const Log = require("../models/Logs"); // TEMPORARILY DISABLED
 
 const router = express.Router();
 
 
-// ==========================
-// SIGNUP
-// ==========================
+/* =========================
+   📝 SIGNUP
+========================= */
 router.post("/signup", async (req, res) => {
 
   try {
 
     const { username, password, role } = req.body;
 
+    // Validation
     if (!username || !password) {
       return res.send("All fields required");
     }
 
+    // Check existing user
     const exists = await User.findOne({ username });
 
     if (exists) {
       return res.send("User already exists");
     }
 
+    // Hash password
     const hash = await bcrypt.hash(password, 10);
 
-    await User.create({
+    // Create user
+    const newUser = await User.create({
       username,
       password: hash,
       role: role || "user"
     });
 
-    await Logs.create({
+    console.log("✅ User created:", newUser.username);
+
+    // TEMPORARILY DISABLED
+    /*
+    await Log.create({
       message: `New user registered: ${username}`,
       level: "INFO"
     });
+    */
 
-    // ✅ REDIRECT
+    // Redirect to login
     res.redirect("/login.html");
 
   } catch (err) {
-    console.log(err);
-    res.send("Signup error");
+
+    console.error("❌ SIGNUP ERROR:");
+    console.error(err);
+
+    res.status(500).send(err.message);
   }
 
 });
 
 
-// ==========================
-// LOGIN
-// ==========================
+/* =========================
+   🔐 LOGIN
+========================= */
 router.post("/login", async (req, res) => {
 
   try {
 
-    const user = await User.findOne({
-      username: req.body.username
-    });
+    const { username, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ username });
 
     if (!user) {
       return res.send("User not found");
     }
 
-    const ok = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
+    // Compare password
+    const ok = await bcrypt.compare(password, user.password);
 
     if (!ok) {
       return res.send("Wrong password");
     }
 
-    req.session.user = user;
+    // Store session
+    req.session.user = {
+      id: user._id,
+      username: user.username,
+      role: user.role
+    };
 
+    console.log("✅ Login successful:", user.username);
+
+    // TEMPORARILY DISABLED
+    /*
     await Log.create({
       message: `User logged in: ${user.username}`,
       level: "INFO"
     });
+    */
 
-    // ✅ REDIRECT
+    // Redirect
     res.redirect("/dashboard.html");
 
   } catch (err) {
-    console.log(err);
-    res.send("Login error");
+
+    console.error("❌ LOGIN ERROR:");
+    console.error(err);
+
+    res.status(500).send(err.message);
   }
 
 });
 
 
-// ==========================
-// LOGOUT
-// ==========================
+/* =========================
+   🚪 LOGOUT
+========================= */
 router.get("/logout", (req, res) => {
 
-  req.session.destroy();
+  req.session.destroy((err) => {
 
-  res.redirect("/login.html");
+    if (err) {
+      console.error("❌ Logout Error:", err);
+      return res.send("Logout failed");
+    }
+
+    res.redirect("/login.html");
+  });
+
 });
+
 
 module.exports = router;
