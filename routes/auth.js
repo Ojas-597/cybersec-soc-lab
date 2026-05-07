@@ -34,7 +34,7 @@ router.post("/signup", async (req, res) => {
       role: role || "user"
     });
 
-    await Log.create({
+    await Logs.create({
       message: `New user registered: ${username}`,
       level: "INFO"
     });
