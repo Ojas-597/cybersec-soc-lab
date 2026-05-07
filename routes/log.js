@@ -11,60 +11,39 @@ const router = express.Router();
 
 
 /* =========================
-   ➕ ADD LOG
-========================= */
-
-router.post("/log", isAuth, async (req, res) => {
-
-  try {
-
-    const log = await Log.create({
-
-      message: req.body.message,
-
-      level: req.body.level || "INFO"
-
-    });
-
-    res.json({
-      success: true,
-      log
-    });
-
-  } catch (err) {
-
-    console.error("❌ ADD LOG ERROR:");
-    console.error(err);
-
-    res.status(500).send(err.message);
-  }
-
-});
-
-
-/* =========================
    📡 GET LOGS
 ========================= */
 
-router.get("/logs", isAuth, isAnalyst, async (req, res) => {
+router.get(
+  "/logs",
+  isAuth,
+  isAnalyst,
 
-  try {
+  async (req, res) => {
 
-    const logs = await Log.find()
+    try {
 
-      .sort({ time: -1 });
+      const logs =
+        await Log.find()
+        .sort({ time: -1 });
 
-    res.json(logs);
+      res.json(logs);
 
-  } catch (err) {
+    }
 
-    console.error("❌ FETCH LOGS ERROR:");
-    console.error(err);
+    catch (err) {
 
-    res.status(500).send(err.message);
+      console.error(err);
+
+      res.status(500).send(
+        "Failed to load logs"
+      );
+
+    }
+
   }
 
-});
+);
 
 
 module.exports = router;
