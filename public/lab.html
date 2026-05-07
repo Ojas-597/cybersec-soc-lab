@@ -1,580 +1,124 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
   <title>Attack Simulation Lab</title>
-
   <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
-<!-- =========================
-     NAVBAR
-========================= -->
-
+<!-- NAVBAR -->
 <div class="navbar">
-
-  <div class="logo">
-    🧪 Attack Simulation Lab
-  </div>
+  <div class="logo">🧪 SOC Attack Lab</div>
 
   <div class="nav-links">
-
-    <a href="dashboard.html">
-      Dashboard
-    </a>
-
-    <a href="search.html">
-      Search
-    </a>
-
-    <a href="quiz.html">
-      Quiz
-    </a>
-
-    <a href="/logout">
-      Logout
-    </a>
-
+    <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Search</a>
+    <a href="lab.html">Lab</a>
+    <a href="report.html">Report</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="/logout">Logout</a>
   </div>
-
 </div>
 
-
-
-<!-- =========================
-     MAIN CONTAINER
-========================= -->
-
+<!-- CONTENT -->
 <div class="container">
 
-  <div class="card">
+<h1>🧪 Attack Simulation Lab</h1>
 
-    <h1 id="title">
-      Attack Name
-    </h1>
+<p>Select a simulated attack scenario and observe SOC response behavior.</p>
 
-    <br>
+<!-- SCENARIOS -->
+<div class="card">
 
-    <span class="badge" id="severity">
+<h3>Choose Attack Type</h3>
 
-      High Risk
+<select id="attackType">
+  <option value="sql">SQL Injection</option>
+  <option value="xss">Cross Site Scripting (XSS)</option>
+  <option value="ddos">DDoS Attack</option>
+  <option value="phishing">Phishing Attempt</option>
+</select>
 
-    </span>
+<br><br>
 
-    <br><br>
-
-
-    <!-- =========================
-         DEFINITION
-    ========================= -->
-
-    <h2>
-      📖 Definition
-    </h2>
-
-    <p id="definition"></p>
-
-    <br>
-
-
-    <!-- =========================
-         WORKING
-    ========================= -->
-
-    <h2>
-      ⚙ How It Works
-    </h2>
-
-    <p id="working"></p>
-
-    <br>
-
-
-    <!-- =========================
-         EXAMPLE
-    ========================= -->
-
-    <h2>
-      🌍 Real-World Example
-    </h2>
-
-    <p id="example"></p>
-
-    <br>
-
-
-    <!-- =========================
-         COMMANDS
-    ========================= -->
-
-    <h2>
-      💻 Simulation Command
-    </h2>
-
-    <pre id="commands"></pre>
-
-    <br>
-
-
-    <!-- =========================
-         LIVE SIMULATION
-    ========================= -->
-
-    <h2>
-      🧪 Attack Simulation
-    </h2>
-
-    <div id="simulation" class="card">
-
-      Waiting for simulation...
-
-    </div>
-
-    <br>
-
-
-    <!-- =========================
-         PREVENTION
-    ========================= -->
-
-    <h2>
-      🛡 Prevention
-    </h2>
-
-    <p id="solution"></p>
-
-  </div>
+<button onclick="runSimulation()">
+  🚀 Run Simulation
+</button>
 
 </div>
 
+<!-- RESULT -->
+<div id="result"></div>
 
+</div>
 
 <script>
 
-/* =========================
-   ATTACK DATABASE
-========================= */
+// AUTH CHECK
+fetch("/me")
+.then(r=>r.json())
+.then(data=>{
+  if(!data.loggedIn){
+    window.location.href="/login.html";
+  }
+});
 
-const data = {
+// SIMULATION ENGINE
+function runSimulation(){
 
-  "SQL Injection": {
+  let type = document.getElementById("attackType").value;
 
-    severity: "Critical",
+  let output = "";
 
-    definition:
-    "SQL Injection is a web attack where malicious SQL queries are inserted into input fields.",
-
-    working:
-    "Attackers manipulate backend database queries to bypass authentication or extract data.",
-
-    example:
-    "Many websites suffered database leaks due to insecure SQL queries.",
-
-    commands:
-    "' OR '1'='1",
-
-    solution:
-    "Use prepared statements and input validation."
-
-  },
-
-
-  "Nmap": {
-
-    severity: "Medium",
-
-    definition:
-    "Nmap is used for network discovery and port scanning.",
-
-    working:
-    "Attackers scan systems to identify open ports and services.",
-
-    example:
-    "Nmap is widely used during penetration testing.",
-
-    commands:
-    "nmap -sV 192.168.1.1",
-
-    solution:
-    "Close unused ports and configure firewalls."
-
-  },
-
-
-  "Phishing": {
-
-    severity: "High",
-
-    definition:
-    "Phishing tricks users into revealing credentials.",
-
-    working:
-    "Attackers impersonate trusted organizations using fake emails.",
-
-    example:
-    "Bank phishing attacks commonly steal passwords.",
-
-    commands:
-    "SET Toolkit → Email Attack",
-
-    solution:
-    "Conduct awareness training and use MFA."
-
-  },
-
-
-  "Wireshark": {
-
-    severity: "Medium",
-
-    definition:
-    "Wireshark captures and analyzes packets.",
-
-    working:
-    "SOC analysts inspect network packets to detect attacks.",
-
-    example:
-    "Packet captures are used during incident response.",
-
-    commands:
-    "wireshark",
-
-    solution:
-    "Encrypt network traffic."
-
-  },
-
-
-  "XSS": {
-
-    severity: "High",
-
-    definition:
-    "Cross Site Scripting injects malicious JavaScript into webpages.",
-
-    working:
-    "Attackers inject scripts executed in victim browsers.",
-
-    example:
-    "Stored XSS can steal cookies.",
-
-    commands:
-    "<script>alert('XSS')</script>",
-
-    solution:
-    "Escape HTML and validate inputs."
-
-  },
-
-
-  "Spoofing": {
-
-    severity: "High",
-
-    definition:
-    "Spoofing impersonates trusted users or systems.",
-
-    working:
-    "Attackers fake identities such as IP or email addresses.",
-
-    example:
-    "Email spoofing is used in phishing campaigns.",
-
-    commands:
-    "SET Toolkit → Spoofing",
-
-    solution:
-    "Use SPF, DKIM, MFA, and validation."
-
+  if(type === "sql"){
+    output = `
+      <div class="card">
+        <h3>🚨 SQL Injection Detected</h3>
+        <p><b>Impact:</b> Database compromise possible</p>
+        <p><b>Detection:</b> Suspicious query patterns found</p>
+        <p><b>Mitigation:</b> Use prepared statements + WAF</p>
+        <span class="badge">HIGH RISK</span>
+      </div>
+    `;
   }
 
-};
-
-
-/* =========================
-   GET ATTACK
-========================= */
-
-let attack =
-
-new URLSearchParams(
-  window.location.search
-).get("attack");
-
-
-document.getElementById("title")
-.innerText = attack;
-
-
-/* =========================
-   LOAD DATA
-========================= */
-
-if (data[attack]) {
-
-  document.getElementById("severity")
-  .innerText =
-    data[attack].severity;
-
-
-  document.getElementById("definition")
-  .innerText =
-    data[attack].definition;
-
-
-  document.getElementById("working")
-  .innerText =
-    data[attack].working;
-
-
-  document.getElementById("example")
-  .innerText =
-    data[attack].example;
-
-
-  document.getElementById("commands")
-  .innerText =
-    data[attack].commands;
-
-
-  document.getElementById("solution")
-  .innerText =
-    data[attack].solution;
-
-}
-
-
-/* =========================
-   SIMULATION ENGINE
-========================= */
-
-const sim =
-document.getElementById(
-  "simulation"
-);
-
-
-/* =========================
-   SQL INJECTION
-========================= */
-
-if (
-  attack === "SQL Injection"
-) {
-
-  sim.innerHTML = `
-
-    <h3>
-      💉 SQL Injection Demo
-    </h3>
-
-    <p>
-      Simulating malicious login bypass...
-    </p>
-
-    <pre>
-
-SELECT * FROM users
-WHERE username='admin'
-AND password='' OR '1'='1';
-
-    </pre>
-
-    <p>
-      ⚠ Authentication bypass simulated
-    </p>
-
-  `;
-
-}
-
-
-/* =========================
-   PHISHING
-========================= */
-
-else if (
-  attack === "Phishing"
-) {
-
-  sim.innerHTML = `
-
-    <h3>
-      🎣 Fake Email Simulation
-    </h3>
-
-    <pre>
-
-FROM: bank-security@gmail.com
-
-SUBJECT: Verify your account
-
-Click here immediately
-to avoid suspension.
-
-    </pre>
-
-    <p>
-      ⚠ User credentials targeted
-    </p>
-
-  `;
-
-}
-
-
-/* =========================
-   NMAP
-========================= */
-
-else if (
-  attack === "Nmap"
-) {
-
-  sim.innerHTML = `
-
-    <h3>
-      📡 Port Scan Simulation
-    </h3>
-
-    <pre>
-
-PORT     STATE SERVICE
-
-22/tcp   open  ssh
-
-80/tcp   open  http
-
-443/tcp  open  https
-
-    </pre>
-
-    <p>
-      ⚠ Open ports discovered
-    </p>
-
-  `;
-
-}
-
-
-/* =========================
-   WIRESHARK
-========================= */
-
-else if (
-  attack === "Wireshark"
-) {
-
-  sim.innerHTML = `
-
-    <h3>
-      📦 Packet Capture
-    </h3>
-
-    <pre>
-
-192.168.1.10 → 8.8.8.8
-
-TCP SYN Packet
-
-Length: 60 bytes
-
-    </pre>
-
-    <p>
-      ⚠ Traffic analysis simulated
-    </p>
-
-  `;
-
-}
-
-
-/* =========================
-   XSS
-========================= */
-
-else if (
-  attack === "XSS"
-) {
-
-  sim.innerHTML = `
-
-    <h3>
-      ⚠ XSS Payload
-    </h3>
-
-    <pre>
-
-<script>
-alert('XSS Attack');
-</script>
-
-    </pre>
-
-    <p>
-      ⚠ Browser script injection simulated
-    </p>
-
-  `;
-
-}
-
-
-/* =========================
-   SPOOFING
-========================= */
-
-else if (
-  attack === "Spoofing"
-) {
-
-  sim.innerHTML = `
-
-    <h3>
-      🕵 Identity Spoofing
-    </h3>
-
-    <pre>
-
-FROM:
-admin@secure-bank.com
-
-REAL SOURCE:
-attacker@fake.com
-
-    </pre>
-
-    <p>
-      ⚠ Identity spoofing simulated
-    </p>
-
-  `;
-
-}
-
-
-/* =========================
-   DEFAULT
-========================= */
-
-else {
-
-  sim.innerHTML = `
-
-    <p>
-
-      No simulation available.
-
-    </p>
-
-  `;
-
+  if(type === "xss"){
+    output = `
+      <div class="card">
+        <h3>🚨 XSS Attack Simulated</h3>
+        <p><b>Impact:</b> Session hijacking possible</p>
+        <p><b>Detection:</b> Script injection pattern detected</p>
+        <p><b>Mitigation:</b> Input sanitization + CSP headers</p>
+        <span class="badge">MEDIUM RISK</span>
+      </div>
+    `;
+  }
+
+  if(type === "ddos"){
+    output = `
+      <div class="card">
+        <h3>🚨 DDoS Traffic Spike</h3>
+        <p><b>Impact:</b> Service downtime risk</p>
+        <p><b>Detection:</b> Abnormal traffic surge</p>
+        <p><b>Mitigation:</b> Rate limiting + CDN protection</p>
+        <span class="badge">CRITICAL</span>
+      </div>
+    `;
+  }
+
+  if(type === "phishing"){
+    output = `
+      <div class="card">
+        <h3>🚨 Phishing Attempt</h3>
+        <p><b>Impact:</b> Credential theft risk</p>
+        <p><b>Detection:</b> Fake login page detected</p>
+        <p><b>Mitigation:</b> Email filtering + user awareness</p>
+        <span class="badge">HIGH RISK</span>
+      </div>
+    `;
+  }
+
+  document.getElementById("result").innerHTML = output;
 }
 
 </script>
