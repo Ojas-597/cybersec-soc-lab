@@ -1,9 +1,22 @@
 const mongoose = require("mongoose");
 
-const schema = new mongoose.Schema({
-  message: String,
-  level: String,
-  time: { type: Date, default: Date.now }
+const logSchema = new mongoose.Schema({
+
+  message: {
+    type: String,
+    required: true
+  },
+
+  level: {
+    type: String,
+    default: "INFO"
+  },
+
+  time: {
+    type: Date,
+    default: Date.now
+  }
+
 });
 
-module.exports = mongoose.model("Log", schema);
+module.exports = mongoose.model("Log", logSchema);
