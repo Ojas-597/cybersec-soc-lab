@@ -1,28 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Report</title>
+  <title>Security Report</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>📄 Security Report</h2>
+<div class="container">
 
-<div id="report"></div>
+<div class="card">
 
-<script>
-let d = JSON.parse(localStorage.getItem("report"));
+<h1>📄 Generated SOC Report</h1>
 
-if(d){
- document.getElementById("report").innerHTML = `
-  <div class="card">
-   Attack: ${d.def}<br>
-   Impact: ${d.severity}<br>
-   Solution: ${d.solution}
-  </div>
- `;
-}
-</script>
+<br>
+
+<h3>Attack:</h3>
+<p>SQL Injection</p>
+
+<br>
+
+<h3>Impact:</h3>
+<p>High Risk — Database exposure possible</p>
+
+<br>
+
+<h3>Recommended Tool:</h3>
+<p>Burp Suite / SQLMap</p>
+
+<br>
+
+<h3>Solution:</h3>
+<p>
+Use prepared statements,
+input validation,
+and WAF protection.
+</p>
+
+<br>
+
+<button onclick="window.print()">
+🖨 Download / Print Report
+</button>
+
+</div>
+
+</div>
 
 </body>
 </html>
