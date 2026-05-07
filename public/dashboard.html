@@ -34,11 +34,13 @@
 
 <div class="container">
 
-  <h1>Welcome to SOC Monitoring Center</h1>
+  <h1>
+    Welcome to SOC Monitoring Center
+  </h1>
 
 
   <!-- =========================
-       LIVE STATS
+       STATS
   ========================= -->
 
   <div class="card-grid">
@@ -47,7 +49,9 @@
 
       <h3>Total Incidents</h3>
 
-      <h1 id="incidents">0</h1>
+      <h1 id="incidents">
+        0
+      </h1>
 
     </div>
 
@@ -56,7 +60,9 @@
 
       <h3>Critical Threats</h3>
 
-      <h1 id="critical">0</h1>
+      <h1 id="critical">
+        0
+      </h1>
 
     </div>
 
@@ -65,7 +71,9 @@
 
       <h3>Network Alerts</h3>
 
-      <h1 id="alerts">0</h1>
+      <h1 id="alerts">
+        0
+      </h1>
 
     </div>
 
@@ -88,9 +96,7 @@
     >
 
     <button onclick="ask()">
-
       Analyze Threat
-
     </button>
 
     <br><br>
@@ -101,13 +107,13 @@
 
 
   <!-- =========================
-       LIVE FEED
+       THREAT HISTORY
   ========================= -->
 
   <div class="result-box">
 
     <h2>
-      🚨 Live Threat Feed
+      🚨 Threat Feed
     </h2>
 
     <div id="feed"></div>
@@ -116,8 +122,6 @@
 
 </div>
 
-
-<script src="/socket.io/socket.io.js"></script>
 
 
 <script>
@@ -161,13 +165,14 @@ function ask() {
     document.getElementById("q").value;
 
 
-  fetch('/ask', {
+  fetch("/ask", {
 
-    method: 'POST',
+    method: "POST",
 
     headers: {
 
-      'Content-Type': 'application/json'
+      "Content-Type":
+        "application/json"
 
     },
 
@@ -179,56 +184,92 @@ function ask() {
 
   })
 
-  .then(r => r.json())
+  .then(res => res.json())
 
   .then(data => {
 
-    let resultsHTML = "";
+    let html = "";
 
 
     data.forEach(d => {
 
-      resultsHTML += `
+      html += `
 
         <div class="card">
 
-          <h3>🚨 Attack Detected</h3>
+          <h3>🚨 ${d.attack}</h3>
 
-          <p><b>${d.attack}</b></p>
+          <p>
+            <b>Severity:</b>
+            ${d.severity}
+          </p>
 
-          <br>
+          <p>
+            <b>Tool:</b>
+            ${d.tool}
+          </p>
 
-          <h3>Severity</h3>
+          <p>
+            <b>Solution:</b>
+            ${d.solution}
+          </p>
 
-          <p>${d.severity}</p>
-
-          <br>
-
-          <h3>Tool</h3>
-
-          <p>${d.tool}</p>
-
-          <br>
-
-          <h3>Solution</h3>
-
-          <p>${d.solution}</p>
-
-          <br>
-
-          <h3>Confidence</h3>
-
-          <p>${d.confidence}</p>
+          <p>
+            <b>Confidence:</b>
+            ${d.confidence}
+          </p>
 
         </div>
 
       `;
 
+
+      totalIncidents++;
+
+      networkAlerts++;
+
+      if (
+        d.severity === "HIGH"
+      ) {
+
+        criticalThreats++;
+
+      }
+
     });
 
 
+    updateStats();
+
+
     document.getElementById("res")
-      .innerHTML = resultsHTML;
+      .innerHTML = html;
+
+
+    document.getElementById("feed")
+      .innerHTML = html +
+      document.getElementById("feed").innerHTML;
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+    document.getElementById("res")
+      .innerHTML = `
+
+      <div class="card">
+
+        <h3>❌ Error</h3>
+
+        <p>
+          Failed to analyze threat
+        </p>
+
+      </div>
+
+    `;
 
   });
 
@@ -236,74 +277,8 @@ function ask() {
 
 
 /* =========================
-   SOCKET.IO
+   INITIAL LOAD
 ========================= */
-
-const socket = io();
-
-
-socket.on("connect", () => {
-
-  console.log(
-    "🟢 Connected to realtime SOC server"
-  );
-
-});
-
-
-socket.on("new-threat", (data) => {
-
-  console.log(
-    "🚨 Threat Received:",
-    data
-  );
-
-
-  totalIncidents++;
-
-  networkAlerts++;
-
-
-  if (
-    data.severity === "HIGH"
-  ) {
-
-    criticalThreats++;
-
-  }
-
-
-  updateStats();
-
-
-  document.getElementById("feed")
-    .innerHTML = `
-
-      <div class="card">
-
-        <h3>🚨 ${data.attack}</h3>
-
-        <p>
-          Severity:
-          <b>${data.severity}</b>
-        </p>
-
-        <p>
-          Confidence:
-          ${data.confidence}
-        </p>
-
-        <p>
-          Time:
-          ${new Date(data.time).toLocaleString()}
-        </p>
-
-      </div>
-
-    ` + document.getElementById("feed").innerHTML;
-
-});
-
 
 updateStats();
 
