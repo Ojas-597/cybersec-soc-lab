@@ -9,29 +9,31 @@ const router = express.Router();
 
 
 /* =========================
-   🔍 ASK QUERY
+   🔍 AI THREAT ANALYZER
 ========================= */
+
 router.post("/ask", isAuth, async (req, res) => {
 
   try {
 
-    // Validate input
     if (!req.body.question) {
-      return res.status(400).send("Question is required");
+      return res.status(400).send("Question required");
     }
 
     let q = req.body.question.toLowerCase();
 
     let results = [];
 
+
     /* =========================
-       🛡️ ATTACK DETECTION
+       🚨 ATTACK DETECTION
     ========================= */
 
     if (q.includes("login") || q.includes("bypass")) {
 
       results.push({
         attack: "SQL Injection",
+        severity: "HIGH",
         tool: "Burp Suite / SQLmap",
         solution: "Use prepared statements",
         confidence: "80%"
@@ -43,6 +45,7 @@ router.post("/ask", isAuth, async (req, res) => {
 
       results.push({
         attack: "Sniffing",
+        severity: "MEDIUM",
         tool: "Wireshark",
         solution: "Analyze packets",
         confidence: "60%"
@@ -54,6 +57,7 @@ router.post("/ask", isAuth, async (req, res) => {
 
       results.push({
         attack: "Port Scanning",
+        severity: "MEDIUM",
         tool: "Nmap",
         solution: "Close unused ports",
         confidence: "70%"
@@ -65,53 +69,79 @@ router.post("/ask", isAuth, async (req, res) => {
 
       results.push({
         attack: "Phishing",
-        tool: "Social Engineering Toolkit",
-        solution: "User awareness",
+        severity: "HIGH",
+        tool: "SET Toolkit",
+        solution: "User awareness training",
         confidence: "75%"
       });
 
     }
 
-    // Default response
+
+    /* =========================
+       ❓ UNKNOWN
+    ========================= */
+
     if (results.length === 0) {
 
       results.push({
-        attack: "Unknown",
+        attack: "Unknown Threat",
+        severity: "LOW",
         tool: "Nmap",
-        solution: "Perform scan",
+        solution: "Perform deeper investigation",
         confidence: "40%"
       });
 
     }
+
 
     /* =========================
        💾 SAVE QUERY
     ========================= */
 
     await Query.create({
+
       user: req.session.user.username,
+
       question: req.body.question,
+
       response: JSON.stringify(results)
+
     });
+
 
     /* =========================
        📊 SAVE LOG
     ========================= */
 
-    // TEMPORARILY SAFE VERSION
-    try {
+    await Log.create({
 
-      await Log.create({
-        message: `Query by ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
-        level: "INFO"
-      });
+      message:
+        `Threat detected for ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
 
-    } catch (logErr) {
+      level: "INFO"
 
-      console.error("⚠️ LOG SAVE ERROR:");
-      console.error(logErr);
+    });
 
-    }
+
+    /* =========================
+       📡 REALTIME ALERT
+    ========================= */
+
+    const io = req.app.get("io");
+
+    io.emit("new-threat", {
+
+      attack: results[0].attack,
+
+      severity: results[0].severity,
+
+      confidence: results[0].confidence,
+
+      time: new Date()
+
+    });
+
 
     /* =========================
        ✅ RESPONSE
