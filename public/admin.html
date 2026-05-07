@@ -6,11 +6,17 @@
 </head>
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
-  <div class="logo">👑 Admin Panel</div>
+  <div class="logo">👑 SOC Admin Panel</div>
 
   <div class="nav-links">
     <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Search</a>
+    <a href="lab.html">Lab</a>
+    <a href="report.html">Report</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="upload.html">Upload</a>
     <a href="logs.html">Logs</a>
     <a href="/logout">Logout</a>
   </div>
@@ -18,41 +24,77 @@
 
 <div class="container">
 
-<h1>Manage Users</h1>
+<h1>👑 Admin Control Center</h1>
 
+<p>Manage users, monitor activity, and control SOC system operations.</p>
+
+<!-- USER TABLE -->
 <div class="card">
+
+<h2>👥 Registered Users</h2>
+
 <table class="table">
 <thead>
 <tr>
-<th>Username</th>
-<th>Role</th>
+  <th>Username</th>
+  <th>Role</th>
 </tr>
 </thead>
+
 <tbody id="users"></tbody>
 </table>
+
+</div>
+
+<!-- SYSTEM CONTROL -->
+<div class="card">
+
+<h2>⚙ System Controls</h2>
+
+<button onclick="alert('Logs cleared')">Clear Logs</button>
+<button onclick="alert('System Scan Started')">Run Security Scan</button>
+
 </div>
 
 </div>
 
 <script>
-fetch('/users')
+
+// AUTH CHECK (ADMIN ONLY)
+fetch("/me")
 .then(r=>r.json())
 .then(data=>{
 
- let users=document.getElementById('users');
+  if(!data.loggedIn){
+    window.location.href="/login.html";
+    return;
+  }
 
- data.forEach(u=>{
+  if(data.user.role !== "admin"){
+    alert("Access Denied");
+    window.location.href="dashboard.html";
+  }
 
- users.innerHTML += `
- <tr>
-   <td>${u.username}</td>
-   <td><span class="badge">${u.role}</span></td>
- </tr>
- `;
+});
 
- })
+// LOAD USERS
+fetch("/users")
+.then(r=>r.json())
+.then(data=>{
 
-})
+  let users = document.getElementById("users");
+
+  data.forEach(u=>{
+    users.innerHTML += `
+      <tr>
+        <td>${u.username}</td>
+        <td>${u.role}</td>
+      </tr>
+    `;
+  });
+
+});
+
 </script>
 
 </body>
