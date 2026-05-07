@@ -1,24 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Quiz</title>
+  <title>Cyber Quiz</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>🧠 Cybersecurity Quiz</h2>
+<div class="container">
 
-<p>What tool is used for port scanning?</p>
+<div class="card">
 
-<button onclick="ans(false)">Wireshark</button>
-<button onclick="ans(true)">Nmap</button>
+<h1>🧠 Cybersecurity Quiz</h1>
 
-<p id="res"></p>
+<h3>
+Q: What tool is used for port scanning?
+</h3>
+
+<button onclick="check('A')">A) Nmap</button>
+<button onclick="check('B')">B) Wireshark</button>
+
+<h2 id="result"></h2>
+
+</div>
+
+</div>
 
 <script>
-function ans(correct){
- document.getElementById("res").innerText =
- correct ? "Correct ✅" : "Wrong ❌";
+function check(a){
+
+ if(a==='A'){
+   document.getElementById('result').innerText='✔ Correct';
+ }
+ else{
+   document.getElementById('result').innerText='❌ Wrong';
+ }
+
 }
 </script>
 
