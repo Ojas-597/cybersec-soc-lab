@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
   <title>SOC Logs</title>
@@ -12,16 +13,20 @@
 
 <div class="container">
 
-  <h1>📡 Realtime SOC Logs</h1>
+  <h1>📡 SOC Logs</h1>
 
   <table class="table">
 
     <thead>
 
       <tr>
+
         <th>Level</th>
+
         <th>Message</th>
+
         <th>Time</th>
+
       </tr>
 
     </thead>
@@ -35,22 +40,77 @@
 
 <script>
 
-const logsTable = document.getElementById("logs");
+const logsTable =
+  document.getElementById("logs");
 
 
 /* =========================
-   LOAD EXISTING LOGS
+   LOAD LOGS
 ========================= */
 
-fetch('/logs')
+fetch("/logs")
 
-.then(r => r.json())
+.then(res => {
+
+  if (!res.ok) {
+
+    throw new Error(
+      "Failed to fetch logs"
+    );
+
+  }
+
+  return res.json();
+
+})
 
 .then(data => {
 
   logsTable.innerHTML = "";
 
+
+  if (data.length === 0) {
+
+    logsTable.innerHTML = `
+
+      <tr>
+
+        <td colspan="3">
+
+          No logs found
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
   data.forEach(addLog);
+
+})
+
+.catch(err => {
+
+  console.error(err);
+
+  logsTable.innerHTML = `
+
+    <tr>
+
+      <td colspan="3">
+
+        ❌ Failed to load logs
+
+      </td>
+
+    </tr>
+
+  `;
 
 });
 
@@ -66,20 +126,32 @@ function addLog(log) {
     <tr>
 
       <td>
+
         <span class="badge">
+
           ${log.level}
+
         </span>
+
       </td>
 
-      <td>${log.message}</td>
+      <td>
+
+        ${log.message}
+
+      </td>
 
       <td>
-        ${new Date(log.time).toLocaleString()}
+
+        ${new Date(log.time)
+          .toLocaleString()}
+
       </td>
 
     </tr>
 
   `;
+
 }
 
 </script>
