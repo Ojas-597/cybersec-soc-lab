@@ -6,38 +6,53 @@
 </head>
 <body>
 
-<h2>👑 Admin Panel</h2>
+<div class="navbar">
+  <div class="logo">👑 Admin Panel</div>
 
-<ul id="users"></ul>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="logs.html">Logs</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<div class="container">
+
+<h1>Manage Users</h1>
+
+<div class="card">
+<table class="table">
+<thead>
+<tr>
+<th>Username</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody id="users"></tbody>
+</table>
+</div>
+
+</div>
 
 <script>
-
-fetch('/me')
-.then(r=>r.json())
-.then(u=>{
- if(!u || u.role !== "admin"){
-   alert("Access denied");
-   window.location="dashboard.html";
- }
-});
-
 fetch('/users')
 .then(r=>r.json())
 .then(data=>{
- let list = document.getElementById("users");
+
+ let users=document.getElementById('users');
 
  data.forEach(u=>{
-   let li = document.createElement("li");
 
-   li.innerHTML = `
-     ${u.username} (${u.role})
-     ${u.role !== "admin" ? `<a href="/delete/${u._id}">Delete</a>` : ""}
-   `;
+ users.innerHTML += `
+ <tr>
+   <td>${u.username}</td>
+   <td><span class="badge">${u.role}</span></td>
+ </tr>
+ `;
 
-   list.appendChild(li);
- });
-});
+ })
 
+})
 </script>
 
 </body>
