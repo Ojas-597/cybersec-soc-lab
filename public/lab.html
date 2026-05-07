@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
   <title>Attack Simulation Lab</title>
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
 
 <div class="navbar">
 
@@ -13,53 +22,128 @@
   </div>
 
   <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="search.html">Search</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="/logout">Logout</a>
+
+    <a href="dashboard.html">
+      Dashboard
+    </a>
+
+    <a href="search.html">
+      Search
+    </a>
+
+    <a href="quiz.html">
+      Quiz
+    </a>
+
+    <a href="/logout">
+      Logout
+    </a>
+
   </div>
 
 </div>
+
+
+
+<!-- =========================
+     MAIN CONTAINER
+========================= -->
 
 <div class="container">
 
   <div class="card">
 
-    <h1 id="title">Attack Name</h1>
+    <h1 id="title">
+      Attack Name
+    </h1>
 
     <br>
 
     <span class="badge" id="severity">
+
       High Risk
+
     </span>
 
     <br><br>
 
-    <h2>📖 Definition</h2>
+
+    <!-- =========================
+         DEFINITION
+    ========================= -->
+
+    <h2>
+      📖 Definition
+    </h2>
 
     <p id="definition"></p>
 
     <br>
 
-    <h2>⚙ How It Works</h2>
+
+    <!-- =========================
+         WORKING
+    ========================= -->
+
+    <h2>
+      ⚙ How It Works
+    </h2>
 
     <p id="working"></p>
 
     <br>
 
-    <h2>🌍 Real-World Example</h2>
+
+    <!-- =========================
+         EXAMPLE
+    ========================= -->
+
+    <h2>
+      🌍 Real-World Example
+    </h2>
 
     <p id="example"></p>
 
     <br>
 
-    <h2>💻 Simulation Command</h2>
+
+    <!-- =========================
+         COMMANDS
+    ========================= -->
+
+    <h2>
+      💻 Simulation Command
+    </h2>
 
     <pre id="commands"></pre>
 
     <br>
 
-    <h2>🛡 Prevention</h2>
+
+    <!-- =========================
+         LIVE SIMULATION
+    ========================= -->
+
+    <h2>
+      🧪 Attack Simulation
+    </h2>
+
+    <div id="simulation" class="card">
+
+      Waiting for simulation...
+
+    </div>
+
+    <br>
+
+
+    <!-- =========================
+         PREVENTION
+    ========================= -->
+
+    <h2>
+      🛡 Prevention
+    </h2>
 
     <p id="solution"></p>
 
@@ -67,7 +151,13 @@
 
 </div>
 
+
+
 <script>
+
+/* =========================
+   ATTACK DATABASE
+========================= */
 
 const data = {
 
@@ -82,7 +172,7 @@ const data = {
     "Attackers manipulate backend database queries to bypass authentication or extract data.",
 
     example:
-    "Many websites have suffered database leaks due to weak SQL validation.",
+    "Many websites suffered database leaks due to insecure SQL queries.",
 
     commands:
     "' OR '1'='1",
@@ -92,18 +182,19 @@ const data = {
 
   },
 
+
   "Nmap": {
 
     severity: "Medium",
 
     definition:
-    "Nmap is a network scanning technique used to discover open ports and services.",
+    "Nmap is used for network discovery and port scanning.",
 
     working:
-    "Attackers scan IP ranges to identify vulnerable systems.",
+    "Attackers scan systems to identify open ports and services.",
 
     example:
-    "Reconnaissance before penetration testing commonly uses Nmap.",
+    "Nmap is widely used during penetration testing.",
 
     commands:
     "nmap -sV 192.168.1.1",
@@ -113,81 +204,376 @@ const data = {
 
   },
 
+
   "Phishing": {
 
     severity: "High",
 
     definition:
-    "Phishing attacks trick users into revealing sensitive information.",
+    "Phishing tricks users into revealing credentials.",
 
     working:
-    "Fake emails or websites impersonate trusted organizations.",
+    "Attackers impersonate trusted organizations using fake emails.",
 
     example:
-    "Bank phishing attacks commonly steal user credentials.",
+    "Bank phishing attacks commonly steal passwords.",
 
     commands:
-    "SEToolkit → Social Engineering Attack",
+    "SET Toolkit → Email Attack",
 
     solution:
-    "Conduct user awareness training and email filtering."
+    "Conduct awareness training and use MFA."
 
   },
+
 
   "Wireshark": {
 
     severity: "Medium",
 
     definition:
-    "Wireshark is used for packet analysis and traffic monitoring.",
+    "Wireshark captures and analyzes packets.",
 
     working:
-    "Captured packets are analyzed to detect suspicious behavior.",
+    "SOC analysts inspect network packets to detect attacks.",
 
     example:
-    "SOC analysts use packet captures during incident response.",
+    "Packet captures are used during incident response.",
 
     commands:
     "wireshark",
 
     solution:
-    "Encrypt traffic and monitor suspicious packets."
+    "Encrypt network traffic."
+
+  },
+
+
+  "XSS": {
+
+    severity: "High",
+
+    definition:
+    "Cross Site Scripting injects malicious JavaScript into webpages.",
+
+    working:
+    "Attackers inject scripts executed in victim browsers.",
+
+    example:
+    "Stored XSS can steal cookies.",
+
+    commands:
+    "<script>alert('XSS')</script>",
+
+    solution:
+    "Escape HTML and validate inputs."
+
+  },
+
+
+  "Spoofing": {
+
+    severity: "High",
+
+    definition:
+    "Spoofing impersonates trusted users or systems.",
+
+    working:
+    "Attackers fake identities such as IP or email addresses.",
+
+    example:
+    "Email spoofing is used in phishing campaigns.",
+
+    commands:
+    "SET Toolkit → Spoofing",
+
+    solution:
+    "Use SPF, DKIM, MFA, and validation."
 
   }
 
 };
 
+
+/* =========================
+   GET ATTACK
+========================= */
+
 let attack =
-new URLSearchParams(window.location.search)
-.get("attack");
 
-document.getElementById("title").innerText = attack;
+new URLSearchParams(
+  window.location.search
+).get("attack");
 
-if(data[attack]){
 
- document.getElementById("severity")
- .innerText = data[attack].severity;
+document.getElementById("title")
+.innerText = attack;
 
- document.getElementById("definition")
- .innerText = data[attack].definition;
 
- document.getElementById("working")
- .innerText = data[attack].working;
+/* =========================
+   LOAD DATA
+========================= */
 
- document.getElementById("example")
- .innerText = data[attack].example;
+if (data[attack]) {
 
- document.getElementById("commands")
- .innerText = data[attack].commands;
+  document.getElementById("severity")
+  .innerText =
+    data[attack].severity;
 
- document.getElementById("solution")
- .innerText = data[attack].solution;
+
+  document.getElementById("definition")
+  .innerText =
+    data[attack].definition;
+
+
+  document.getElementById("working")
+  .innerText =
+    data[attack].working;
+
+
+  document.getElementById("example")
+  .innerText =
+    data[attack].example;
+
+
+  document.getElementById("commands")
+  .innerText =
+    data[attack].commands;
+
+
+  document.getElementById("solution")
+  .innerText =
+    data[attack].solution;
 
 }
-else{
 
- document.getElementById("definition")
- .innerText = "No data available.";
+
+/* =========================
+   SIMULATION ENGINE
+========================= */
+
+const sim =
+document.getElementById(
+  "simulation"
+);
+
+
+/* =========================
+   SQL INJECTION
+========================= */
+
+if (
+  attack === "SQL Injection"
+) {
+
+  sim.innerHTML = `
+
+    <h3>
+      💉 SQL Injection Demo
+    </h3>
+
+    <p>
+      Simulating malicious login bypass...
+    </p>
+
+    <pre>
+
+SELECT * FROM users
+WHERE username='admin'
+AND password='' OR '1'='1';
+
+    </pre>
+
+    <p>
+      ⚠ Authentication bypass simulated
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   PHISHING
+========================= */
+
+else if (
+  attack === "Phishing"
+) {
+
+  sim.innerHTML = `
+
+    <h3>
+      🎣 Fake Email Simulation
+    </h3>
+
+    <pre>
+
+FROM: bank-security@gmail.com
+
+SUBJECT: Verify your account
+
+Click here immediately
+to avoid suspension.
+
+    </pre>
+
+    <p>
+      ⚠ User credentials targeted
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   NMAP
+========================= */
+
+else if (
+  attack === "Nmap"
+) {
+
+  sim.innerHTML = `
+
+    <h3>
+      📡 Port Scan Simulation
+    </h3>
+
+    <pre>
+
+PORT     STATE SERVICE
+
+22/tcp   open  ssh
+
+80/tcp   open  http
+
+443/tcp  open  https
+
+    </pre>
+
+    <p>
+      ⚠ Open ports discovered
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   WIRESHARK
+========================= */
+
+else if (
+  attack === "Wireshark"
+) {
+
+  sim.innerHTML = `
+
+    <h3>
+      📦 Packet Capture
+    </h3>
+
+    <pre>
+
+192.168.1.10 → 8.8.8.8
+
+TCP SYN Packet
+
+Length: 60 bytes
+
+    </pre>
+
+    <p>
+      ⚠ Traffic analysis simulated
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   XSS
+========================= */
+
+else if (
+  attack === "XSS"
+) {
+
+  sim.innerHTML = `
+
+    <h3>
+      ⚠ XSS Payload
+    </h3>
+
+    <pre>
+
+<script>
+alert('XSS Attack');
+</script>
+
+    </pre>
+
+    <p>
+      ⚠ Browser script injection simulated
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   SPOOFING
+========================= */
+
+else if (
+  attack === "Spoofing"
+) {
+
+  sim.innerHTML = `
+
+    <h3>
+      🕵 Identity Spoofing
+    </h3>
+
+    <pre>
+
+FROM:
+admin@secure-bank.com
+
+REAL SOURCE:
+attacker@fake.com
+
+    </pre>
+
+    <p>
+      ⚠ Identity spoofing simulated
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   DEFAULT
+========================= */
+
+else {
+
+  sim.innerHTML = `
+
+    <p>
+
+      No simulation available.
+
+    </p>
+
+  `;
 
 }
 
