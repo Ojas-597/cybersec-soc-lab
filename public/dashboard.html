@@ -11,10 +11,6 @@
 
 <body>
 
-<!-- =========================
-     NAVBAR
-========================= -->
-
 <div class="navbar">
 
   <div class="logo">
@@ -36,10 +32,6 @@
 </div>
 
 
-<!-- =========================
-     MAIN CONTAINER
-========================= -->
-
 <div class="container">
 
   <h1>Welcome to SOC Monitoring Center</h1>
@@ -55,9 +47,7 @@
 
       <h3>Total Incidents</h3>
 
-      <h1 id="incidents">
-        0
-      </h1>
+      <h1 id="incidents">0</h1>
 
     </div>
 
@@ -66,9 +56,7 @@
 
       <h3>Critical Threats</h3>
 
-      <h1 id="critical">
-        0
-      </h1>
+      <h1 id="critical">0</h1>
 
     </div>
 
@@ -77,9 +65,7 @@
 
       <h3>Network Alerts</h3>
 
-      <h1 id="alerts">
-        0
-      </h1>
+      <h1 id="alerts">0</h1>
 
     </div>
 
@@ -87,7 +73,7 @@
 
 
   <!-- =========================
-       AI RECOMMENDATION
+       AI ANALYZER
   ========================= -->
 
   <div class="result-box">
@@ -102,7 +88,9 @@
     >
 
     <button onclick="ask()">
+
       Analyze Threat
+
     </button>
 
     <br><br>
@@ -113,13 +101,13 @@
 
 
   <!-- =========================
-       REALTIME ALERTS
+       THREAT FEED
   ========================= -->
 
   <div class="result-box">
 
     <h2>
-      🚨 Live Threat Feed
+      🚨 Threat Feed
     </h2>
 
     <div id="feed"></div>
@@ -130,17 +118,10 @@
 
 
 
-<!-- =========================
-     SOCKET.IO
-========================= -->
-
-<script src="/socket.io/socket.io.js"></script>
-
-
 <script>
 
 /* =========================
-   LIVE COUNTERS
+   COUNTERS
 ========================= */
 
 let totalIncidents = 0;
@@ -151,7 +132,7 @@ let networkAlerts = 0;
 
 
 /* =========================
-   UPDATE UI COUNTERS
+   UPDATE STATS
 ========================= */
 
 function updateStats() {
@@ -164,6 +145,7 @@ function updateStats() {
 
   document.getElementById("alerts").innerText =
     networkAlerts;
+
 }
 
 
@@ -176,16 +158,21 @@ function ask() {
   let question =
     document.getElementById("q").value;
 
+
   fetch('/ask', {
 
     method: 'POST',
 
     headers: {
+
       'Content-Type': 'application/json'
+
     },
 
     body: JSON.stringify({
+
       question
+
     })
 
   })
@@ -195,6 +182,7 @@ function ask() {
   .then(data => {
 
     let resultsHTML = "";
+
 
     data.forEach(d => {
 
@@ -236,10 +224,59 @@ function ask() {
 
       `;
 
+
+      /* =========================
+         UPDATE COUNTERS
+      ========================= */
+
+      totalIncidents++;
+
+      networkAlerts++;
+
+      if (d.severity === "HIGH") {
+
+        criticalThreats++;
+
+      }
+
     });
+
+
+    updateStats();
+
 
     document.getElementById("res").innerHTML =
       resultsHTML;
+
+
+    /* =========================
+       ADD TO FEED
+    ========================= */
+
+    document.getElementById("feed").innerHTML = `
+
+      <div class="card">
+
+        <h3>🚨 ${data[0].attack}</h3>
+
+        <p>
+          Severity:
+          <b>${data[0].severity}</b>
+        </p>
+
+        <p>
+          Confidence:
+          ${data[0].confidence}
+        </p>
+
+        <p>
+          Time:
+          ${new Date().toLocaleString()}
+        </p>
+
+      </div>
+
+    ` + document.getElementById("feed").innerHTML;
 
   })
 
@@ -265,75 +302,7 @@ function ask() {
 
 
 /* =========================
-   REALTIME SOCKET
-========================= */
-
-const socket = io();
-
-
-socket.on("connect", () => {
-
-  console.log("🟢 Connected to realtime SOC server");
-
-});
-
-
-socket.on("new-threat", (data) => {
-
-  console.log("🚨 Live Threat:", data);
-
-
-  /* =========================
-     UPDATE COUNTERS
-  ========================= */
-
-  totalIncidents++;
-
-  networkAlerts++;
-
-  if (
-    data.severity === "HIGH"
-  ) {
-    criticalThreats++;
-  }
-
-  updateStats();
-
-
-  /* =========================
-     LIVE FEED
-  ========================= */
-
-  document.getElementById("feed").innerHTML = `
-
-    <div class="card">
-
-      <h3>🚨 ${data.attack}</h3>
-
-      <p>
-        Severity:
-        <b>${data.severity}</b>
-      </p>
-
-      <p>
-        Confidence:
-        ${data.confidence}
-      </p>
-
-      <p>
-        Time:
-        ${new Date(data.time).toLocaleString()}
-      </p>
-
-    </div>
-
-  ` + document.getElementById("feed").innerHTML;
-
-});
-
-
-/* =========================
-   INITIAL UI LOAD
+   INITIAL LOAD
 ========================= */
 
 updateStats();
