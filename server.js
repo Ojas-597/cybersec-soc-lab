@@ -5,7 +5,15 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
 
+const http = require("http");
+const { Server } = require("socket.io");
+
+
 const app = express();
+
+const server = http.createServer(app);
+
+const io = new Server(server);
 
 
 /* =========================
@@ -74,6 +82,26 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 /* =========================
+   📡 SOCKET.IO
+========================= */
+
+io.on("connection", (socket) => {
+
+  console.log("🟢 Client Connected");
+
+  socket.on("disconnect", () => {
+
+    console.log("🔴 Client Disconnected");
+
+  });
+
+});
+
+
+app.set("io", io);
+
+
+/* =========================
    📦 ROUTES
 ========================= */
 
@@ -87,7 +115,7 @@ app.use("/", logRoutes);
 
 
 /* =========================
-   🧪 TEST ROUTE
+   🧪 TEST
 ========================= */
 
 app.get("/test", (req, res) => {
@@ -109,7 +137,7 @@ app.get("/test", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
 
   console.log(
     `🔥 Server running at http://localhost:${PORT}`
