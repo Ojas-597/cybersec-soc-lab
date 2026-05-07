@@ -13,7 +13,9 @@
 
 <div class="container">
 
-  <h1>📡 SOC Logs</h1>
+  <h1>
+    📡 SOC Logs
+  </h1>
 
   <table class="table">
 
@@ -39,6 +41,32 @@
 
 
 <script>
+
+/* =========================
+   ROLE CHECK
+========================= */
+
+fetch("/me")
+
+.then(res => res.json())
+
+.then(data => {
+
+  if (
+    !data.loggedIn ||
+    !["admin", "analyst"]
+      .includes(data.user.role)
+  ) {
+
+    alert("❌ Access Denied");
+
+    window.location.href =
+      "/dashboard.html";
+
+  }
+
+});
+
 
 const logsTable =
   document.getElementById("logs");
