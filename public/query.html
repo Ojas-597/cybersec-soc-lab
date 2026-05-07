@@ -1,108 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI Query Analysis</title>
+  <title>SOC AI Threat Console</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
 
   <div class="logo">
-    🤖 AI Security Analysis
+    🤖 SOC AI Intelligence Console
   </div>
 
   <div class="nav-links">
     <a href="dashboard.html">Dashboard</a>
     <a href="search.html">Knowledge Base</a>
+    <a href="lab.html">Lab</a>
     <a href="logs.html">Logs</a>
     <a href="/logout">Logout</a>
   </div>
 
 </div>
 
+<!-- MAIN CONTAINER -->
 <div class="container">
 
   <div class="card">
 
-    <h1>Describe Security Issue</h1>
+    <h1>🧠 SOC Threat Intelligence Query Engine</h1>
 
     <p>
-      Enter suspicious activity, attack symptoms,
-      or security concerns for AI-based analysis.
+      Enter security incidents, logs, or attack symptoms.
+      The system will classify and generate SOC-level analysis.
     </p>
 
     <br>
 
     <input
       id="q"
-      placeholder="Example: login bypass vulnerability"
+      placeholder="e.g. multiple failed login attempts from same IP"
     >
 
+    <br><br>
+
     <button onclick="ask()">
-      Analyze Threat
+      🔍 Analyze Threat
     </button>
 
   </div>
 
+  <!-- OUTPUT -->
   <div id="output"></div>
 
 </div>
 
 <script>
 
+/* ========================
+   AI QUERY ENGINE
+======================== */
 function ask(){
 
- fetch('/ask', {
+  let question = document.getElementById("q").value;
 
-   method:'POST',
+  fetch('/ask', {
 
-   headers:{
-     'Content-Type':'application/json'
-   },
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
 
-   body:JSON.stringify({
-     question:document.getElementById('q').value
-   })
+    body: JSON.stringify({
+      question
+    })
 
- })
+  })
 
- .then(r=>r.json())
+  .then(r => r.json())
 
- .then(d=>{
+  .then(data => {
 
-   document.getElementById('output').innerHTML = `
+    let html = "";
 
-   <div class="result-box">
+    data.forEach(d => {
 
-   <h2>🚨 Threat Analysis Result</h2>
+      let severityColor = "green";
 
-   <br>
+      if(d.severity === "HIGH") severityColor = "red";
+      if(d.severity === "MEDIUM") severityColor = "orange";
+      if(d.severity === "LOW") severityColor = "green";
 
-   <h3>Detected Attack</h3>
-   <p>${d.attack}</p>
+      html += `
+        <div class="card">
 
-   <br>
+          <h2>🚨 SOC Threat Analysis</h2>
 
-   <h3>Recommended Tool</h3>
-   <p>${d.tool}</p>
+          <p><b>Attack Type:</b> ${d.attack}</p>
 
-   <br>
+          <p><b>Severity:</b> 
+            <span style="color:${severityColor}">
+              ${d.severity}
+            </span>
+          </p>
 
-   <h3>Suggested Solution</h3>
-   <p>${d.solution}</p>
+          <p><b>Detection Tool:</b> ${d.tool}</p>
 
-   <br>
+          <p><b>Mitigation Strategy:</b> ${d.solution}</p>
 
-   <span class="badge">
-     AI Recommendation Generated
-   </span>
+          <p><b>Confidence:</b> ${d.confidence || "85%"}</p>
 
-   </div>
+          <span class="badge">
+            AI Classified Threat
+          </span>
 
-   `;
+        </div>
+      `;
+    });
 
- })
+    document.getElementById("output").innerHTML = html;
+
+  });
 
 }
 
