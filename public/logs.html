@@ -33,9 +33,6 @@
 </div>
 
 
-<!-- SOCKET.IO -->
-<script src="/socket.io/socket.io.js"></script>
-
 <script>
 
 const logsTable = document.getElementById("logs");
@@ -84,28 +81,6 @@ function addLog(log) {
 
   `;
 }
-
-
-/* =========================
-   REALTIME SOCKET
-========================= */
-
-const socket = io();
-
-socket.on("new-threat", (data) => {
-
-  addLog({
-
-    level: data.severity,
-
-    message:
-      `🚨 ${data.attack} threat detected (${data.confidence})`,
-
-    time: data.time
-
-  });
-
-});
 
 </script>
 
