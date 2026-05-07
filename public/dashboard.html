@@ -101,13 +101,13 @@
 
 
   <!-- =========================
-       THREAT FEED
+       LIVE FEED
   ========================= -->
 
   <div class="result-box">
 
     <h2>
-      🚨 Threat Feed
+      🚨 Live Threat Feed
     </h2>
 
     <div id="feed"></div>
@@ -116,6 +116,8 @@
 
 </div>
 
+
+<script src="/socket.io/socket.io.js"></script>
 
 
 <script>
@@ -137,14 +139,14 @@ let networkAlerts = 0;
 
 function updateStats() {
 
-  document.getElementById("incidents").innerText =
-    totalIncidents;
+  document.getElementById("incidents")
+    .innerText = totalIncidents;
 
-  document.getElementById("critical").innerText =
-    criticalThreats;
+  document.getElementById("critical")
+    .innerText = criticalThreats;
 
-  document.getElementById("alerts").innerText =
-    networkAlerts;
+  document.getElementById("alerts")
+    .innerText = networkAlerts;
 
 }
 
@@ -192,9 +194,7 @@ function ask() {
 
           <h3>🚨 Attack Detected</h3>
 
-          <p>
-            <b>${d.attack}</b>
-          </p>
+          <p><b>${d.attack}</b></p>
 
           <br>
 
@@ -204,7 +204,7 @@ function ask() {
 
           <br>
 
-          <h3>Recommended Tool</h3>
+          <h3>Tool</h3>
 
           <p>${d.tool}</p>
 
@@ -224,77 +224,11 @@ function ask() {
 
       `;
 
-
-      /* =========================
-         UPDATE COUNTERS
-      ========================= */
-
-      totalIncidents++;
-
-      networkAlerts++;
-
-      if (d.severity === "HIGH") {
-
-        criticalThreats++;
-
-      }
-
     });
 
 
-    updateStats();
-
-
-    document.getElementById("res").innerHTML =
-      resultsHTML;
-
-
-    /* =========================
-       ADD TO FEED
-    ========================= */
-
-    document.getElementById("feed").innerHTML = `
-
-      <div class="card">
-
-        <h3>🚨 ${data[0].attack}</h3>
-
-        <p>
-          Severity:
-          <b>${data[0].severity}</b>
-        </p>
-
-        <p>
-          Confidence:
-          ${data[0].confidence}
-        </p>
-
-        <p>
-          Time:
-          ${new Date().toLocaleString()}
-        </p>
-
-      </div>
-
-    ` + document.getElementById("feed").innerHTML;
-
-  })
-
-  .catch(err => {
-
-    console.error(err);
-
-    document.getElementById("res").innerHTML = `
-
-      <div class="card">
-
-        <h3>❌ Error</h3>
-
-        <p>Failed to analyze threat.</p>
-
-      </div>
-
-    `;
+    document.getElementById("res")
+      .innerHTML = resultsHTML;
 
   });
 
@@ -302,8 +236,74 @@ function ask() {
 
 
 /* =========================
-   INITIAL LOAD
+   SOCKET.IO
 ========================= */
+
+const socket = io();
+
+
+socket.on("connect", () => {
+
+  console.log(
+    "🟢 Connected to realtime SOC server"
+  );
+
+});
+
+
+socket.on("new-threat", (data) => {
+
+  console.log(
+    "🚨 Threat Received:",
+    data
+  );
+
+
+  totalIncidents++;
+
+  networkAlerts++;
+
+
+  if (
+    data.severity === "HIGH"
+  ) {
+
+    criticalThreats++;
+
+  }
+
+
+  updateStats();
+
+
+  document.getElementById("feed")
+    .innerHTML = `
+
+      <div class="card">
+
+        <h3>🚨 ${data.attack}</h3>
+
+        <p>
+          Severity:
+          <b>${data.severity}</b>
+        </p>
+
+        <p>
+          Confidence:
+          ${data.confidence}
+        </p>
+
+        <p>
+          Time:
+          ${new Date(data.time).toLocaleString()}
+        </p>
+
+      </div>
+
+    ` + document.getElementById("feed").innerHTML;
+
+});
+
 
 updateStats();
 
