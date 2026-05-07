@@ -1,123 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-  <title>Search Vulnerabilities</title>
-
+  <title>SOC Threat Search</title>
   <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">🔍 SOC Search</div>
+
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Search</a>
+    <a href="lab.html">Lab</a>
+    <a href="report.html">Report</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<!-- CONTENT -->
 <div class="container">
 
-  <h1>🔍 Search Vulnerabilities</h1>
+<h1>🔍 Threat Intelligence Search</h1>
 
-  <input
-    placeholder="Search vulnerability..."
-    id="search"
-    onkeyup="searchAttack()"
-  >
+<p>Search known cyber threats and get SOC recommendations instantly.</p>
 
-  <div id="results" class="card-grid"></div>
+<div class="card">
+
+<input id="query" placeholder="e.g. SQL Injection, Phishing, DDoS">
+
+<br><br>
+
+<button onclick="searchThreat()">
+  Search
+</button>
+
+</div>
+
+<!-- RESULT -->
+<div id="output"></div>
 
 </div>
 
 <script>
 
-const attacks = [
+// AUTH CHECK
+fetch("/me")
+.then(r=>r.json())
+.then(data=>{
+  if(!data.loggedIn){
+    window.location.href="/login.html";
+  }
+});
 
-  {
-    name: "SQL Injection",
-    severity: "HIGH",
-    tool: "SQLmap"
-  },
+// SEARCH ENGINE
+function searchThreat(){
 
-  {
-    name: "XSS",
-    severity: "MEDIUM",
-    tool: "Burp Suite"
-  },
+  let q = document.getElementById("query").value.toLowerCase();
 
-  {
-    name: "Phishing",
-    severity: "HIGH",
-    tool: "SET Toolkit"
-  },
+  let result = "";
 
-  {
-    name: "Port Scanning",
-    severity: "MEDIUM",
-    tool: "Nmap"
-  },
-
-  {
-    name: "Wireshark",
-    severity: "LOW",
-    tool: "Wireshark"
-  },
-
-  {
-    name: "Spoofing",
-    severity: "HIGH",
-    tool: "Ettercap"
+  if(q.includes("sql")){
+    result = `
+      <div class="card">
+        <h3>🧨 SQL Injection</h3>
+        <p><b>Description:</b> Malicious SQL code injection into database queries</p>
+        <p><b>Impact:</b> Data breach, unauthorized access</p>
+        <p><b>Detection:</b> WAF logs, query anomaly detection</p>
+        <p><b>Prevention:</b> Prepared statements, ORM usage</p>
+      </div>
+    `;
   }
 
-];
-
-
-/* =========================
-   SEARCH
-========================= */
-
-function searchAttack() {
-
-  let q =
-    document.getElementById("search")
-    .value
-    .toLowerCase();
-
-
-  let res = attacks.filter(a =>
-
-    a.name.toLowerCase().includes(q)
-
-  );
-
-
-  document.getElementById("results").innerHTML =
-
-    res.map(r => `
-
+  else if(q.includes("xss")){
+    result = `
       <div class="card">
-
-        <h3>${r.name}</h3>
-
-        <p>
-          Severity:
-          <b>${r.severity}</b>
-        </p>
-
-        <p>
-          Tool:
-          ${r.tool}
-        </p>
-
-        <br>
-
-        <a href="lab.html?attack=${encodeURIComponent(r.name)}">
-
-          <button>
-            Open Lab
-          </button>
-
-        </a>
-
+        <h3>⚠️ Cross Site Scripting (XSS)</h3>
+        <p><b>Description:</b> Injection of malicious scripts into websites</p>
+        <p><b>Impact:</b> Session theft, defacement</p>
+        <p><b>Detection:</b> Script pattern analysis</p>
+        <p><b>Prevention:</b> Input sanitization, CSP headers</p>
       </div>
+    `;
+  }
 
-    `).join("");
+  else if(q.includes("ddos")){
+    result = `
+      <div class="card">
+        <h3>🚨 DDoS Attack</h3>
+        <p><b>Description:</b> Overloading server with traffic</p>
+        <p><b>Impact:</b> Downtime, service disruption</p>
+        <p><b>Detection:</b> Traffic spikes monitoring</p>
+        <p><b>Prevention:</b> Rate limiting, CDN protection</p>
+      </div>
+    `;
+  }
 
+  else if(q.includes("phishing")){
+    result = `
+      <div class="card">
+        <h3>🎣 Phishing Attack</h3>
+        <p><b>Description:</b> Fake emails/websites to steal credentials</p>
+        <p><b>Impact:</b> Account compromise</p>
+        <p><b>Detection:</b> URL analysis, email filtering</p>
+        <p><b>Prevention:</b> User awareness training</p>
+      </div>
+    `;
+  }
+
+  else {
+    result = `
+      <div class="card">
+        <h3>❌ No Match Found</h3>
+        <p>Try searching: SQL Injection, XSS, DDoS, Phishing</p>
+      </div>
+    `;
+  }
+
+  document.getElementById("output").innerHTML = result;
 }
 
 </script>
