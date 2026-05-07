@@ -19,13 +19,21 @@
 
   <div class="nav-links">
 
-    <a href="search.html">Search</a>
+    <a href="search.html">
+      Search
+    </a>
 
-    <a href="logs.html">Logs</a>
+    <a href="logs.html" id="logsLink">
+      Logs
+    </a>
 
-    <a href="quiz.html">Quiz</a>
+    <a href="quiz.html">
+      Quiz
+    </a>
 
-    <a href="/logout">Logout</a>
+    <a href="/logout">
+      Logout
+    </a>
 
   </div>
 
@@ -107,7 +115,7 @@
 
 
   <!-- =========================
-       THREAT HISTORY
+       THREAT FEED
   ========================= -->
 
   <div class="result-box">
@@ -125,6 +133,51 @@
 
 
 <script>
+
+/* =========================
+   ROLE CHECK
+========================= */
+
+fetch("/me")
+
+.then(res => res.json())
+
+.then(data => {
+
+  if (!data.loggedIn) {
+
+    window.location.href =
+      "/login.html";
+
+    return;
+
+  }
+
+
+  const role =
+    data.user.role;
+
+
+  console.log(
+    "Logged in as:",
+    role
+  );
+
+
+  /* =========================
+     USER RESTRICTIONS
+  ========================= */
+
+  if (role === "user") {
+
+    document
+      .getElementById("logsLink")
+      .style.display = "none";
+
+  }
+
+});
+
 
 /* =========================
    COUNTERS
@@ -197,26 +250,40 @@ function ask() {
 
         <div class="card">
 
-          <h3>🚨 ${d.attack}</h3>
+          <h3>
+            🚨 ${d.attack}
+          </h3>
 
           <p>
+
             <b>Severity:</b>
+
             ${d.severity}
+
           </p>
 
           <p>
+
             <b>Tool:</b>
+
             ${d.tool}
+
           </p>
 
           <p>
+
             <b>Solution:</b>
+
             ${d.solution}
+
           </p>
 
           <p>
+
             <b>Confidence:</b>
+
             ${d.confidence}
+
           </p>
 
         </div>
@@ -227,6 +294,7 @@ function ask() {
       totalIncidents++;
 
       networkAlerts++;
+
 
       if (
         d.severity === "HIGH"
@@ -248,7 +316,8 @@ function ask() {
 
     document.getElementById("feed")
       .innerHTML = html +
-      document.getElementById("feed").innerHTML;
+      document.getElementById("feed")
+      .innerHTML;
 
   })
 
