@@ -24,71 +24,44 @@ router.post("/signup", async (req, res) => {
     } = req.body;
 
 
-    /* =========================
-       VALIDATION
-    ========================= */
-
     if (!username || !password) {
 
-      return res.status(400).send(
+      return res.send(
         "All fields required"
       );
 
     }
 
 
-    /* =========================
-       CHECK EXISTING USER
-    ========================= */
-
-    const exists = await User.findOne({
-      username
-    });
+    const existingUser =
+      await User.findOne({
+        username
+      });
 
 
-    if (exists) {
+    if (existingUser) {
 
-      return res.status(400).send(
+      return res.send(
         "User already exists"
       );
 
     }
 
 
-    /* =========================
-       HASH PASSWORD
-    ========================= */
-
-    const hash = await bcrypt.hash(
-      password,
-      10
-    );
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
 
 
-    /* =========================
-       CREATE USER
-    ========================= */
-
-    const newUser = await User.create({
+    await User.create({
 
       username,
 
-      password: hash,
+      password: hashedPassword,
 
       role: role || "user"
 
     });
 
-
-    console.log(
-      "✅ User created:",
-      newUser.username
-    );
-
-
-    /* =========================
-       CREATE LOG
-    ========================= */
 
     await Log.create({
 
@@ -100,23 +73,24 @@ router.post("/signup", async (req, res) => {
     });
 
 
-    /* =========================
-       REDIRECT
-    ========================= */
+    console.log(
+      `✅ Signup successful: ${username}`
+    );
+
 
     res.redirect("/login.html");
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(
-      "❌ SIGNUP ERROR:"
+      "❌ SIGNUP ERROR"
     );
 
     console.error(err);
 
-    res.status(500).send(
-      err.message
-    );
+    res.send("Signup error");
 
   }
 
@@ -137,46 +111,36 @@ router.post("/login", async (req, res) => {
     } = req.body;
 
 
-    /* =========================
-       FIND USER
-    ========================= */
-
-    const user = await User.findOne({
-      username
-    });
+    const user =
+      await User.findOne({
+        username
+      });
 
 
     if (!user) {
 
-      return res.status(404).send(
+      return res.send(
         "User not found"
       );
 
     }
 
 
-    /* =========================
-       CHECK PASSWORD
-    ========================= */
-
-    const ok = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const validPassword =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
 
-    if (!ok) {
+    if (!validPassword) {
 
-      return res.status(401).send(
+      return res.send(
         "Wrong password"
       );
 
     }
 
-
-    /* =========================
-       SAVE SESSION
-    ========================= */
 
     req.session.user = {
 
@@ -189,43 +153,34 @@ router.post("/login", async (req, res) => {
     };
 
 
-    console.log(
-      "✅ Login successful:",
-      user.username
-    );
-
-
-    /* =========================
-       LOGIN LOG
-    ========================= */
-
     await Log.create({
 
       message:
         `User logged in: ${user.username}`,
 
-      level: results[0].severity
+      level: "INFO"
 
     });
 
 
-    /* =========================
-       REDIRECT
-    ========================= */
+    console.log(
+      `✅ Login successful: ${user.username}`
+    );
+
 
     res.redirect("/dashboard.html");
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(
-      "❌ LOGIN ERROR:"
+      "❌ LOGIN ERROR"
     );
 
     console.error(err);
 
-    res.status(500).send(
-      err.message
-    );
+    res.send("Login error");
 
   }
 
@@ -238,21 +193,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/logout", (req, res) => {
 
-  req.session.destroy((err) => {
-
-    if (err) {
-
-      console.error(
-        "❌ Logout Error:"
-      );
-
-      console.error(err);
-
-      return res.send(
-        "Logout failed"
-      );
-
-    }
+  req.session.destroy(() => {
 
     res.redirect("/login.html");
 
