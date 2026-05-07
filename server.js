@@ -5,7 +5,14 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
 
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
+
+const server = http.createServer(app);
+
+const io = new Server(server);
 
 
 /* =========================
@@ -32,12 +39,9 @@ app.use(session({
   saveUninitialized: false,
 
   cookie: {
-
     httpOnly: true,
-
-    secure: false, // true only with HTTPS
-
-    maxAge: 1000 * 60 * 60 // 1 hour
+    secure: false,
+    maxAge: 1000 * 60 * 60
   }
 
 }));
@@ -59,17 +63,30 @@ app.use(express.static(
 mongoose.connect(process.env.MONGO_URI)
 
 .then(() => {
-
   console.log("✅ MongoDB Connected");
-
 })
 
 .catch((err) => {
-
   console.error("❌ MongoDB Error:");
   console.error(err);
+});
+
+
+/* =========================
+   📡 SOCKET.IO
+========================= */
+
+io.on("connection", (socket) => {
+
+  console.log("🟢 User connected");
+
+  socket.on("disconnect", () => {
+    console.log("🔴 User disconnected");
+  });
 
 });
+
+app.set("io", io);
 
 
 /* =========================
@@ -100,7 +117,7 @@ app.get("/test", (req, res) => {
 
 
 /* =========================
-   ❌ 404 HANDLER
+   ❌ 404
 ========================= */
 
 app.use((req, res) => {
@@ -114,7 +131,7 @@ app.use((req, res) => {
 
 
 /* =========================
-   ⚠️ GLOBAL ERROR HANDLER
+   ⚠️ ERROR HANDLER
 ========================= */
 
 app.use((err, req, res, next) => {
@@ -136,7 +153,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
 
   console.log(
     `🔥 Server running at http://localhost:${PORT}`
