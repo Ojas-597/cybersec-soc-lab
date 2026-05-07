@@ -1,30 +1,85 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
   <title>Signup</title>
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
 <div class="auth-box">
 
-  <h1>🛡 Register</h1>
+  <h1>
+    📝 Create Account
+  </h1>
 
-  <form action="/signup" method="POST">
+  <form
+    action="/signup"
+    method="POST"
+  >
 
-    <input type="text" name="username" placeholder="Username" required>
+    <input
+      type="text"
+      name="username"
+      placeholder="Username"
+      required
+    >
 
-    <input type="password" name="password" placeholder="Password" required>
+    <input
+      type="password"
+      name="password"
+      placeholder="Password"
+      required
+    >
 
-    <select name="role">
-      <option value="user">👤 User</option>
-      <option value="analyst">🧪 Analyst</option>
-      <option value="admin">👑 Admin</option>
+    <select
+      name="role"
+      required
+    >
+
+      <option value="">
+        Select Role
+      </option>
+
+      <option value="user">
+        User
+      </option>
+
+      <option value="analyst">
+        Analyst
+      </option>
+
+      <option value="admin">
+        Admin
+      </option>
+
     </select>
 
-    <button type="submit">Create Account</button>
+    <button type="submit">
+
+      Signup
+
+    </button>
 
   </form>
+
+  <br>
+
+  <p style="text-align:center;">
+
+    Already have account?
+
+    <a href="login.html">
+
+      Login
+
+    </a>
+
+  </p>
 
 </div>
 
