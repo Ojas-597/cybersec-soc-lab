@@ -1,70 +1,194 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lab</title>
+  <title>Attack Simulation Lab</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2 id="title"></h2>
+<div class="navbar">
 
-<p id="def"></p>
-<p id="how"></p>
-<p id="case"></p>
+  <div class="logo">
+    🧪 Attack Simulation Lab
+  </div>
 
-<h3>Command</h3>
-<pre id="commands"></pre>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Search</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="/logout">Logout</a>
+  </div>
 
-<h3>Output</h3>
-<pre id="output"></pre>
+</div>
 
-<h3>Solution</h3>
-<p id="solution"></p>
+<div class="container">
+
+  <div class="card">
+
+    <h1 id="title">Attack Name</h1>
+
+    <br>
+
+    <span class="badge" id="severity">
+      High Risk
+    </span>
+
+    <br><br>
+
+    <h2>📖 Definition</h2>
+
+    <p id="definition"></p>
+
+    <br>
+
+    <h2>⚙ How It Works</h2>
+
+    <p id="working"></p>
+
+    <br>
+
+    <h2>🌍 Real-World Example</h2>
+
+    <p id="example"></p>
+
+    <br>
+
+    <h2>💻 Simulation Command</h2>
+
+    <pre id="commands"></pre>
+
+    <br>
+
+    <h2>🛡 Prevention</h2>
+
+    <p id="solution"></p>
+
+  </div>
+
+</div>
 
 <script>
 
 const data = {
+
   "SQL Injection": {
-    def: "Injection of malicious SQL queries",
-    how: "Unsanitized input fields",
-    case: "Login bypass attack",
-    commands: "' OR '1'='1",
-    output: "Login successful without password",
-    solution: "Use prepared statements"
+
+    severity: "Critical",
+
+    definition:
+    "SQL Injection is a web attack where malicious SQL queries are inserted into input fields.",
+
+    working:
+    "Attackers manipulate backend database queries to bypass authentication or extract data.",
+
+    example:
+    "Many websites have suffered database leaks due to weak SQL validation.",
+
+    commands:
+    "' OR '1'='1",
+
+    solution:
+    "Use prepared statements and input validation."
+
   },
 
-  "Port Scanning": {
-    def: "Scanning open ports",
-    how: "Using network scanners",
-    case: "Recon phase",
-    commands: "nmap -sV 192.168.1.1",
-    output: "PORT 80 open HTTP",
-    solution: "Close unused ports"
+  "Nmap": {
+
+    severity: "Medium",
+
+    definition:
+    "Nmap is a network scanning technique used to discover open ports and services.",
+
+    working:
+    "Attackers scan IP ranges to identify vulnerable systems.",
+
+    example:
+    "Reconnaissance before penetration testing commonly uses Nmap.",
+
+    commands:
+    "nmap -sV 192.168.1.1",
+
+    solution:
+    "Close unused ports and configure firewalls."
+
   },
 
   "Phishing": {
-    def: "Fake emails to steal data",
-    how: "Social engineering",
-    case: "Fake login pages",
-    commands: "SET toolkit",
-    output: "User enters credentials",
-    solution: "User awareness"
+
+    severity: "High",
+
+    definition:
+    "Phishing attacks trick users into revealing sensitive information.",
+
+    working:
+    "Fake emails or websites impersonate trusted organizations.",
+
+    example:
+    "Bank phishing attacks commonly steal user credentials.",
+
+    commands:
+    "SEToolkit → Social Engineering Attack",
+
+    solution:
+    "Conduct user awareness training and email filtering."
+
+  },
+
+  "Wireshark": {
+
+    severity: "Medium",
+
+    definition:
+    "Wireshark is used for packet analysis and traffic monitoring.",
+
+    working:
+    "Captured packets are analyzed to detect suspicious behavior.",
+
+    example:
+    "SOC analysts use packet captures during incident response.",
+
+    commands:
+    "wireshark",
+
+    solution:
+    "Encrypt traffic and monitor suspicious packets."
+
   }
+
 };
 
-let attack = new URLSearchParams(location.search).get("attack");
+let attack =
+new URLSearchParams(window.location.search)
+.get("attack");
 
 document.getElementById("title").innerText = attack;
 
-if (data[attack]) {
-  document.getElementById("def").innerText = "Definition: " + data[attack].def;
-  document.getElementById("how").innerText = "How it works: " + data[attack].how;
-  document.getElementById("case").innerText = "Case: " + data[attack].case;
-  document.getElementById("commands").innerText = data[attack].commands;
-  document.getElementById("output").innerText = data[attack].output;
-  document.getElementById("solution").innerText = data[attack].solution;
-} else {
-  document.getElementById("commands").innerText = "No data available";
+if(data[attack]){
+
+ document.getElementById("severity")
+ .innerText = data[attack].severity;
+
+ document.getElementById("definition")
+ .innerText = data[attack].definition;
+
+ document.getElementById("working")
+ .innerText = data[attack].working;
+
+ document.getElementById("example")
+ .innerText = data[attack].example;
+
+ document.getElementById("commands")
+ .innerText = data[attack].commands;
+
+ document.getElementById("solution")
+ .innerText = data[attack].solution;
+
+}
+else{
+
+ document.getElementById("definition")
+ .innerText = "No data available.";
+
 }
 
 </script>
