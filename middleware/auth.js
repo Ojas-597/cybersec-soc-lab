@@ -1,28 +1,59 @@
-// middleware/auth.js
-
 module.exports = {
 
-  // 🔐 Check login
+  /* =========================
+     🔐 CHECK LOGIN
+  ========================= */
   isAuth: (req, res, next) => {
+
     if (!req.session.user) {
-      return res.send("❌ Please login first");
+
+      return res.status(401).json({
+        success: false,
+        message: "Please login first"
+      });
+
     }
+
     next();
   },
 
-  // 👑 Admin only
+
+  /* =========================
+     👑 ADMIN ONLY
+  ========================= */
   isAdmin: (req, res, next) => {
-    if (req.session.user?.role !== "admin") {
-      return res.send("❌ Admin access only");
+
+    if (!req.session.user ||
+        req.session.user.role !== "admin") {
+
+      return res.status(403).json({
+        success: false,
+        message: "Admin access only"
+      });
+
     }
+
     next();
   },
 
-  // 🧪 Analyst + Admin
+
+  /* =========================
+     🧪 ANALYST + ADMIN
+  ========================= */
   isAnalyst: (req, res, next) => {
-    if (!["admin", "analyst"].includes(req.session.user?.role)) {
-      return res.send("❌ Analyst access only");
+
+    if (
+      !req.session.user ||
+      !["admin", "analyst"].includes(req.session.user.role)
+    ) {
+
+      return res.status(403).json({
+        success: false,
+        message: "Analyst access only"
+      });
+
     }
+
     next();
   }
 
