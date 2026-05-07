@@ -6,45 +6,49 @@
 </head>
 <body>
 
+<div class="navbar">
+  <div class="logo">📄 SOC Report</div>
+
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="report.html">Report</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
 <div class="container">
 
 <div class="card">
 
-<h1>📄 Generated SOC Report</h1>
-
-<br>
+<h1>📄 SOC Generated Report</h1>
 
 <h3>Attack:</h3>
 <p>SQL Injection</p>
 
-<br>
-
 <h3>Impact:</h3>
-<p>High Risk — Database exposure possible</p>
+<p>High Risk - Database Exposure</p>
 
-<br>
-
-<h3>Recommended Tool:</h3>
+<h3>Tool:</h3>
 <p>Burp Suite / SQLMap</p>
 
-<br>
-
 <h3>Solution:</h3>
-<p>
-Use prepared statements,
-input validation,
-and WAF protection.
-</p>
+<p>Use prepared statements, validation, WAF.</p>
 
-<br>
-
-<button onclick="window.print()">
-🖨 Download / Print Report
-</button>
+<button onclick="window.print()">🖨 Download Report</button>
 
 </div>
 
 </div>
+
+<script>
+fetch("/me")
+.then(r=>r.json())
+.then(data=>{
+  if(!data.loggedIn){
+    window.location.href="/login.html";
+  }
+});
+</script>
 
 </body>
 </html>
