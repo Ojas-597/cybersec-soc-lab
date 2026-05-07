@@ -6,7 +6,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
   <div class="logo">📊 SOC Dashboard</div>
 
@@ -14,129 +13,81 @@
     <a href="dashboard.html">Dashboard</a>
     <a href="search.html">Search</a>
     <a href="lab.html">Lab</a>
+    <a href="query.html">Query</a>
     <a href="report.html">Report</a>
     <a href="quiz.html">Quiz</a>
-    <a href="upload.html" id="uploadLink">Upload</a>
-    <a href="logs.html" id="logsLink">Logs</a>
     <a href="/logout">Logout</a>
   </div>
 </div>
 
 <div class="container">
 
-<h1>📊 SOC Monitoring Dashboard</h1>
+<h1>🧠 SOC Monitoring Center</h1>
 
-<!-- STATS -->
 <div class="card-grid">
-
-  <div class="card">
-    <h3>Total Incidents</h3>
-    <h1 id="incidents">0</h1>
-  </div>
-
-  <div class="card">
-    <h3>Critical Threats</h3>
-    <h1 id="critical">0</h1>
-  </div>
-
-  <div class="card">
-    <h3>Network Alerts</h3>
-    <h1 id="alerts">0</h1>
-  </div>
-
+  <div class="card"><h3>Total</h3><h1 id="t">0</h1></div>
+  <div class="card"><h3>High</h3><h1 id="h">0</h1></div>
+  <div class="card"><h3>Critical</h3><h1 id="c">0</h1></div>
 </div>
 
-<!-- AI ANALYZER -->
-<div class="result-box">
+<div class="card">
+  <h2>🤖 AI Analyzer</h2>
+  <input id="q">
+  <button onclick="ask()">Analyze</button>
+  <div id="res"></div>
+</div>
 
-<h2>🤖 AI Threat Analyzer</h2>
-
-<input id="q" placeholder="Describe security issue...">
-<button onclick="ask()">Analyze</button>
-
-<div id="res"></div>
-
+<div class="card">
+  <h2>📡 Live SOC Feed</h2>
+  <div id="feed"></div>
 </div>
 
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
 
 <script>
 
-// AUTH + ROLE CONTROL
-fetch("/me")
+const token = localStorage.getItem("token");
+
+/* STATS */
+function load(){
+fetch("/stats",{headers:{Authorization:"Bearer "+token}})
 .then(r=>r.json())
-.then(data=>{
-
-  if(!data.loggedIn){
-    window.location.href="/login.html";
-    return;
-  }
-
-  const role = data.user.role;
-
-  // hide upload for non-admin
-  if(role !== "admin"){
-    const up = document.getElementById("uploadLink");
-    if(up) up.style.display="none";
-  }
-
-  // hide logs for normal users
-  if(role === "user"){
-    const logs = document.getElementById("logsLink");
-    if(logs) logs.style.display="none";
-  }
-
+.then(d=>{
+  document.getElementById("t").innerText=d.total;
+  document.getElementById("h").innerText=d.high;
+  document.getElementById("c").innerText=d.critical;
 });
-
-// STATS
-let total=0, critical=0, alerts=0;
-
-function update(){
-  document.getElementById("incidents").innerText=total;
-  document.getElementById("critical").innerText=critical;
-  document.getElementById("alerts").innerText=alerts;
 }
+load();
+setInterval(load,5000);
 
-// AI ANALYZER
+/* AI */
 function ask(){
-
-  let question = document.getElementById("q").value;
-
-  fetch("/ask",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({question})
-  })
-  .then(r=>r.json())
-  .then(data=>{
-
-    let html="";
-
-    data.forEach(d=>{
-
-      html += `
-        <div class="card">
-          <h3>🚨 ${d.attack}</h3>
-          <p><b>Severity:</b> ${d.severity}</p>
-          <p><b>Tool:</b> ${d.tool}</p>
-          <p><b>Solution:</b> ${d.solution}</p>
-        </div>
-      `;
-
-      total++;
-      alerts++;
-      if(d.severity==="HIGH") critical++;
-
-    });
-
-    update();
-    document.getElementById("res").innerHTML = html;
-
-  });
-
+fetch("/ask",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
+body:JSON.stringify({question:document.getElementById("q").value})
+})
+.then(r=>r.json())
+.then(d=>{
+document.getElementById("res").innerHTML =
+d.map(x=>`<div class="card"><b>${x.attack}</b><p>${x.solution}</p></div>`).join("");
+});
 }
 
-update();
+/* SOCKET */
+const socket = io();
+
+socket.on("soc_event", e=>{
+document.getElementById("feed").innerHTML =
+`<div class="card">${e.type} | ${e.severity} | ${e.user}</div>`
++ document.getElementById("feed").innerHTML;
+});
 
 </script>
 
