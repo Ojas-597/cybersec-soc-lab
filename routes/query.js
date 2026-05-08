@@ -6,7 +6,7 @@ const Query =
 require("../models/Query");
 
 const Log =
-require("../models/Logs");
+require("../models/Log");
 
 const { auth } =
 require("../middleware/authMiddleware");
@@ -26,7 +26,7 @@ description
 
 ){
 
-await Logs.create({
+await Log.create({
 
 user,
 type,
