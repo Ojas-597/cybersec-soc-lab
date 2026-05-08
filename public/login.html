@@ -1,34 +1,188 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Enterprise SOC Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="auth-box">
 
-  <h1>🔐 Login</h1>
+  <h1>
+    🔐 SOC Login
+  </h1>
 
-  <form action="/login" method="POST">
+  <p style="text-align:center; color:#94a3b8;">
 
-    <input type="text" name="username" placeholder="Username" required>
+    Access the Enterprise
+    Security Operations Center
 
-    <input type="password" name="password" placeholder="Password" required>
+  </p>
 
-    <button type="submit">Login</button>
+  <br>
 
-  </form>
+  <!-- ================= LOGIN FORM ================= -->
+
+  <input
+    type="text"
+    id="username"
+    placeholder="Username"
+    required
+  >
+
+  <input
+    type="password"
+    id="password"
+    placeholder="Password"
+    required
+  >
+
+  <!-- ROLE -->
+  <select id="role">
+
+    <option value="user">
+      User / Analyst
+    </option>
+
+    <option value="admin">
+      Administrator
+    </option>
+
+  </select>
+
+  <button onclick="login()">
+    Login
+  </button>
+
+  <div id="msg"></div>
 
   <br>
 
   <p style="text-align:center;">
+
     Don't have account?
-    <a href="signup.html">Signup</a>
+
+    <a href="signup.html">
+      Signup
+    </a>
+
   </p>
 
 </div>
 
+<script>
+
+/* ================= LOGIN ================= */
+
+function login(){
+
+const username =
+document.getElementById("username").value;
+
+const password =
+document.getElementById("password").value;
+
+const role =
+document.getElementById("role").value;
+
+/* EMPTY CHECK */
+if(
+username.trim()==="" ||
+password.trim()===""
+){
+
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:red; margin-top:15px;">
+
+Please fill all fields
+
+</p>
+
+`;
+
+return;
+
+}
+
+/* LOGIN REQUEST */
+fetch("/login",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+username,
+password,
+role
+
+})
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+/* STORE TOKEN */
+localStorage.setItem(
+"token",
+data.token
+);
+
+/* STORE ROLE */
+localStorage.setItem(
+"role",
+data.role
+);
+
+/* SUCCESS */
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:lime; margin-top:15px;">
+
+Login successful
+
+</p>
+
+`;
+
+/* REDIRECT */
+setTimeout(()=>{
+
+window.location.href =
+"dashboard.html";
+
+},1000);
+
+})
+
+.catch(err=>{
+
+console.error(err);
+
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:red; margin-top:15px;">
+
+Login failed
+
+</p>
+
+`;
+
+});
+
+}
+
+</script>
+
 </body>
 </html>
-
