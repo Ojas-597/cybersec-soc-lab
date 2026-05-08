@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Performance Analytics</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+<div class="logo">
+📝 Quiz Performance Analytics
+</div>
+
+<div class="nav-links">
+
+<a href="dashboard.html">Dashboard</a>
+<a href="admin.html">Admin</a>
+<a href="logs.html">Logs</a>
+<a href="/logout">Logout</a>
+
+</div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="container">
+
+<h1>Cybersecurity Quiz Monitoring</h1>
+
+<p>
+Track analyst and user cybersecurity
+training performance.
+</p>
+
+<!-- ================= STATS ================= -->
+<div class="card-grid">
+
+<div class="card">
+<h3>Total Attempts</h3>
+<h1 id="attempts">0</h1>
+</div>
+
+<div class="card">
+<h3>Average Score</h3>
+<h1 id="average">0%</h1>
+</div>
+
+<div class="card">
+<h3>Highest Score</h3>
+<h1 id="highest">0%</h1>
+</div>
+
+</div>
+
+<!-- ================= RESULTS ================= -->
+<div class="card">
+
+<h2>Quiz Results</h2>
+
+<table class="table">
+
+<thead>
+
+<tr>
+<th>User</th>
+<th>Score</th>
+<th>Status</th>
+<th>Time</th>
+</tr>
+
+</thead>
+
+<tbody id="results"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const token = localStorage.getItem("token");
+
+/* ================= LOAD RESULTS ================= */
+
+fetch("/quiz-results", {
+
+headers:{
+Authorization:"Bearer "+token
+}
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+/* TOTAL ATTEMPTS */
+document.getElementById("attempts")
+.innerText = data.length;
+
+/* HIGHEST SCORE */
+let highest = 0;
+
+/* TOTAL */
+let total = 0;
+
+data.forEach(x=>{
+
+total += x.score;
+
+if(x.score > highest){
+highest = x.score;
+}
+
+});
+
+/* AVG */
+let avg = 0;
+
+if(data.length > 0){
+avg = Math.round(total / data.length);
+}
+
+document.getElementById("average")
+.innerText = avg + "%";
+
+document.getElementById("highest")
+.innerText = highest + "%";
+
+/* TABLE */
+document.getElementById("results")
+.innerHTML = data.map(r=>`
+
+<tr>
+
+<td>${r.user}</td>
+
+<td>${r.score}%</td>
+
+<td>
+
+<span class="badge">
+
+${r.score >= 70 ? "PASS" : "FAIL"}
+
+</span>
+
+</td>
+
+<td>
+
+${new Date(r.timestamp)
+.toLocaleString()}
+
+</td>
+
+</tr>
+
+`).join("");
+
+});
+
+</script>
+
+</body>
+</html>
