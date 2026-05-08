@@ -7,48 +7,92 @@
 <body>
 
 <div class="navbar">
-  <div class="logo">🤖 SOC Query Console</div>
+
+  <div class="logo">
+    🤖 SOC Intelligence Console
+  </div>
+
   <div class="nav-links">
     <a href="dashboard.html">Dashboard</a>
+    <a href="search.html">Search</a>
     <a href="lab.html">Lab</a>
+    <a href="report.html">Report</a>
     <a href="logs.html">Logs</a>
+    <a href="/logout">Logout</a>
   </div>
+
 </div>
 
 <div class="container">
 
 <div class="card">
-<h2>Enter Threat Query</h2>
-<input id="q">
-<button onclick="ask()">Analyze</button>
+
+  <h1>Threat Intelligence Query</h1>
+
+  <input
+    id="q"
+    placeholder="Example: SQL injection attack"
+  >
+
+  <button onclick="analyze()">
+    Analyze Threat
+  </button>
+
 </div>
 
-<div id="out"></div>
+<div id="result"></div>
 
 </div>
 
 <script>
-function ask(){
+
+const token = localStorage.getItem("token");
+
+function analyze(){
+
 fetch("/ask",{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json",
-"Authorization":"Bearer "+localStorage.getItem("token")
+Authorization:"Bearer "+token
 },
-body:JSON.stringify({question:document.getElementById("q").value})
+
+body:JSON.stringify({
+question:document.getElementById("q").value
 })
+
+})
+
 .then(r=>r.json())
-.then(d=>{
-document.getElementById("out").innerHTML =
-d.map(x=>`
+
+.then(data=>{
+
+document.getElementById("result").innerHTML =
+
+data.map(d=>`
+
 <div class="card">
-<h3>${x.attack}</h3>
-<p>Severity: ${x.severity}</p>
-<p>${x.solution}</p>
+
+<h2>${d.attack}</h2>
+
+<p><b>Severity:</b> ${d.severity}</p>
+
+<p><b>Detection Tool:</b> ${d.tool}</p>
+
+<p><b>Solution:</b> ${d.solution}</p>
+
+<p><b>Confidence:</b> ${d.confidence}</p>
+
 </div>
+
 `).join("");
+
 });
+
 }
+
 </script>
 
 </body>
