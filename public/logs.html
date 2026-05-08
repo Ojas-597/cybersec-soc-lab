@@ -1,27 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Logs</title>
+  <title>SOC Logs</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div class="navbar">
+
+<div class="logo">
+📜 SOC Event Logs
+</div>
+
+<div class="nav-links">
+
+<a href="dashboard.html">Dashboard</a>
+<a href="report.html">Report</a>
+<a href="/logout">Logout</a>
+
+</div>
+
+</div>
+
 <div class="container">
 
 <div class="card">
-<h1>📜 SOC Logs</h1>
+
+<h1>Security Event Logs</h1>
+
 <div id="logs"></div>
+
 </div>
 
 </div>
 
 <script>
-fetch("/logs",{headers:{Authorization:"Bearer "+localStorage.getItem("token")}})
+
+const token = localStorage.getItem("token");
+
+fetch("/logs",{
+
+headers:{
+Authorization:"Bearer "+token
+}
+
+})
+
 .then(r=>r.json())
-.then(d=>{
-document.getElementById("logs").innerHTML =
-d.map(l=>`<div class="card">${l.type} | ${l.severity} | ${l.user}</div>`).join("");
+
+.then(data=>{
+
+document.getElementById("logs")
+.innerHTML = data.map(log=>`
+
+<div class="card">
+
+<h3>${log.type}</h3>
+
+<p><b>User:</b> ${log.user}</p>
+
+<p><b>Severity:</b> ${log.severity}</p>
+
+<p><b>Source:</b> ${log.source}</p>
+
+<p>
+<b>Time:</b>
+${new Date(log.timestamp).toLocaleString()}
+</p>
+
+</div>
+
+`).join("");
+
 });
+
 </script>
 
 </body>
