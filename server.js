@@ -11,6 +11,44 @@ const path = require("path");
 const { auth, roleCheck } =
 require("./middleware/authMiddleware");
 
+/* ================= CREATE LOG ================= */
+
+app.post("/log-action", auth, async(req,res)=>{
+
+try{
+
+await Log.create({
+
+user:req.user.username,
+
+action:req.body.action,
+
+severity:req.body.severity || "INFO"
+
+});
+
+res.json({
+
+success:true
+
+});
+
+}
+
+catch(err){
+
+console.error(err);
+
+res.status(500).json({
+
+error:"Failed to create log"
+
+});
+
+}
+
+});
+
 const app = express();
 
 const server =
