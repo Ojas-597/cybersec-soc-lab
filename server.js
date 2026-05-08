@@ -86,7 +86,7 @@ app.post("/login", (req,res)=>{
       username,
       role
     },
-    "SECRET",
+    process.env.JWT_SECRET,
     {
       expiresIn:"2h"
     }
@@ -470,7 +470,7 @@ io.on("connection", socket=>{
 });
 
 /* ================= START ================= */
-server.listen(3000, ()=>{
+server.listen(process.env.PORT || 3000){
 
   console.log(
     "MASTER SOC SYSTEM RUNNING"
