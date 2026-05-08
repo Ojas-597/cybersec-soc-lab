@@ -1,33 +1,139 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Threat Search</title>
+  <title>Threat Intelligence Search</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div class="navbar">
+
+<div class="logo">
+🔍 Threat Intelligence Search
+</div>
+
+<div class="nav-links">
+
+<a href="dashboard.html">Dashboard</a>
+<a href="lab.html">Lab</a>
+<a href="query.html">Query</a>
+<a href="report.html">Report</a>
+<a href="/logout">Logout</a>
+
+</div>
+
+</div>
+
 <div class="container">
 
 <div class="card">
-<h2>Search Threat DB</h2>
-<input id="q">
-<button onclick="search()">Search</button>
+
+<h1>Search Threat Knowledge Base</h1>
+
+<input
+id="search"
+placeholder="Search attack type..."
+>
+
+<button onclick="searchThreat()">
+Search
+</button>
+
 </div>
 
-<div id="out"></div>
+<div id="results"></div>
 
 </div>
 
 <script>
-function search(){
-let q=document.getElementById("q").value;
 
-document.getElementById("out").innerHTML=
-`<div class="card">
-<h3>${q}</h3>
-<p>Threat information loaded from SOC knowledge base</p>
-</div>`;
+function searchThreat(){
+
+let q =
+document.getElementById("search")
+.value.toLowerCase();
+
+let html = "";
+
+if(q.includes("sql")){
+
+html = `
+
+<div class="card">
+
+<h2>SQL Injection</h2>
+
+<p>
+SQL Injection is a code injection attack
+that targets database queries.
+</p>
+
+<p>
+<b>Severity:</b> HIGH
+</p>
+
+<p>
+<b>Mitigation:</b>
+Prepared statements + WAF
+</p>
+
+</div>
+
+`;
+
 }
+
+else if(q.includes("xss")){
+
+html = `
+
+<div class="card">
+
+<h2>XSS Attack</h2>
+
+<p>
+Cross-site scripting executes malicious
+scripts in browsers.
+</p>
+
+<p>
+<b>Severity:</b> MEDIUM
+</p>
+
+<p>
+<b>Mitigation:</b>
+Input sanitization + CSP
+</p>
+
+</div>
+
+`;
+
+}
+
+else{
+
+html = `
+
+<div class="card">
+
+<h2>No Exact Match</h2>
+
+<p>
+Threat intelligence unavailable.
+</p>
+
+</div>
+
+`;
+
+}
+
+document.getElementById("results")
+.innerHTML = html;
+
+}
+
 </script>
 
 </body>
