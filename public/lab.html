@@ -1,126 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Attack Simulation Lab</title>
+  <title>Attack Lab</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
-  <div class="logo">🧪 SOC Attack Lab</div>
-
+  <div class="logo">🧪 SOC Lab</div>
   <div class="nav-links">
     <a href="dashboard.html">Dashboard</a>
-    <a href="search.html">Search</a>
     <a href="lab.html">Lab</a>
-    <a href="report.html">Report</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="/logout">Logout</a>
   </div>
 </div>
 
-<!-- CONTENT -->
 <div class="container">
 
-<h1>🧪 Attack Simulation Lab</h1>
-
-<p>Select a simulated attack scenario and observe SOC response behavior.</p>
-
-<!-- SCENARIOS -->
 <div class="card">
+<h2>Select Attack</h2>
 
-<h3>Choose Attack Type</h3>
-
-<select id="attackType">
-  <option value="sql">SQL Injection</option>
-  <option value="xss">Cross Site Scripting (XSS)</option>
-  <option value="ddos">DDoS Attack</option>
-  <option value="phishing">Phishing Attempt</option>
-</select>
-
-<br><br>
-
-<button onclick="runSimulation()">
-  🚀 Run Simulation
-</button>
+<button onclick="run('sql')">SQL Injection</button>
+<button onclick="run('xss')">XSS</button>
+<button onclick="run('ddos')">DDoS</button>
 
 </div>
 
-<!-- RESULT -->
-<div id="result"></div>
+<div id="res"></div>
 
 </div>
 
 <script>
-
-// AUTH CHECK
-fetch("/me")
+function run(type){
+fetch("/lab/run",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+localStorage.getItem("token")
+},
+body:JSON.stringify({type})
+})
 .then(r=>r.json())
-.then(data=>{
-  if(!data.loggedIn){
-    window.location.href="/login.html";
-  }
+.then(d=>{
+document.getElementById("res").innerHTML =
+`<div class="card">
+<h3>${d.type}</h3>
+<p>${d.severity}</p>
+</div>`;
 });
-
-// SIMULATION ENGINE
-function runSimulation(){
-
-  let type = document.getElementById("attackType").value;
-
-  let output = "";
-
-  if(type === "sql"){
-    output = `
-      <div class="card">
-        <h3>🚨 SQL Injection Detected</h3>
-        <p><b>Impact:</b> Database compromise possible</p>
-        <p><b>Detection:</b> Suspicious query patterns found</p>
-        <p><b>Mitigation:</b> Use prepared statements + WAF</p>
-        <span class="badge">HIGH RISK</span>
-      </div>
-    `;
-  }
-
-  if(type === "xss"){
-    output = `
-      <div class="card">
-        <h3>🚨 XSS Attack Simulated</h3>
-        <p><b>Impact:</b> Session hijacking possible</p>
-        <p><b>Detection:</b> Script injection pattern detected</p>
-        <p><b>Mitigation:</b> Input sanitization + CSP headers</p>
-        <span class="badge">MEDIUM RISK</span>
-      </div>
-    `;
-  }
-
-  if(type === "ddos"){
-    output = `
-      <div class="card">
-        <h3>🚨 DDoS Traffic Spike</h3>
-        <p><b>Impact:</b> Service downtime risk</p>
-        <p><b>Detection:</b> Abnormal traffic surge</p>
-        <p><b>Mitigation:</b> Rate limiting + CDN protection</p>
-        <span class="badge">CRITICAL</span>
-      </div>
-    `;
-  }
-
-  if(type === "phishing"){
-    output = `
-      <div class="card">
-        <h3>🚨 Phishing Attempt</h3>
-        <p><b>Impact:</b> Credential theft risk</p>
-        <p><b>Detection:</b> Fake login page detected</p>
-        <p><b>Mitigation:</b> Email filtering + user awareness</p>
-        <span class="badge">HIGH RISK</span>
-      </div>
-    `;
-  }
-
-  document.getElementById("result").innerHTML = output;
 }
-
 </script>
 
 </body>
