@@ -1,54 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Security Report</title>
+  <title>SOC Report</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="navbar">
-  <div class="logo">📄 SOC Report</div>
-
-  <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="report.html">Report</a>
-    <a href="/logout">Logout</a>
-  </div>
-</div>
-
 <div class="container">
 
 <div class="card">
+<h1>📄 SOC Report</h1>
+<p>Auto-generated incident summary</p>
 
-<h1>📄 SOC Generated Report</h1>
-
-<h3>Attack:</h3>
-<p>SQL Injection</p>
-
-<h3>Impact:</h3>
-<p>High Risk - Database Exposure</p>
-
-<h3>Tool:</h3>
-<p>Burp Suite / SQLMap</p>
-
-<h3>Solution:</h3>
-<p>Use prepared statements, validation, WAF.</p>
-
-<button onclick="window.print()">🖨 Download Report</button>
+<button onclick="window.print()">Download</button>
 
 </div>
 
 </div>
-
-<script>
-fetch("/me")
-.then(r=>r.json())
-.then(data=>{
-  if(!data.loggedIn){
-    window.location.href="/login.html";
-  }
-});
-</script>
 
 </body>
 </html>
