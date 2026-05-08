@@ -1,53 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Attack Lab</title>
+  <title>Attack Simulation Lab</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="navbar">
-  <div class="logo">🧪 SOC Lab</div>
-  <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="lab.html">Lab</a>
-  </div>
+
+<div class="logo">
+🧪 SOC Attack Lab
+</div>
+
+<div class="nav-links">
+
+<a href="dashboard.html">Dashboard</a>
+<a href="search.html">Search</a>
+<a href="query.html">Query</a>
+<a href="report.html">Report</a>
+<a href="logs.html">Logs</a>
+<a href="/logout">Logout</a>
+
+</div>
+
 </div>
 
 <div class="container">
 
-<div class="card">
-<h2>Select Attack</h2>
+<h1>Attack Simulation Environment</h1>
 
-<button onclick="run('sql')">SQL Injection</button>
-<button onclick="run('xss')">XSS</button>
-<button onclick="run('ddos')">DDoS</button>
+<div class="card-grid">
+
+<div class="card">
+
+<h2>SQL Injection</h2>
+
+<p>
+Simulate database injection attack.
+</p>
+
+<button onclick="run('sql')">
+Run Simulation
+</button>
 
 </div>
 
-<div id="res"></div>
+<div class="card">
+
+<h2>XSS Attack</h2>
+
+<p>
+Simulate cross-site scripting attack.
+</p>
+
+<button onclick="run('xss')">
+Run Simulation
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>DDoS Attack</h2>
+
+<p>
+Simulate denial of service attack.
+</p>
+
+<button onclick="run('ddos')">
+Run Simulation
+</button>
+
+</div>
+
+</div>
+
+<div id="output"></div>
 
 </div>
 
 <script>
+
+const token = localStorage.getItem("token");
+
 function run(type){
+
 fetch("/lab/run",{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json",
-"Authorization":"Bearer "+localStorage.getItem("token")
+Authorization:"Bearer "+token
 },
+
 body:JSON.stringify({type})
+
 })
+
 .then(r=>r.json())
-.then(d=>{
-document.getElementById("res").innerHTML =
-`<div class="card">
-<h3>${d.type}</h3>
-<p>${d.severity}</p>
-</div>`;
+
+.then(data=>{
+
+document.getElementById("output").innerHTML = `
+
+<div class="card">
+
+<h2>🚨 Attack Event Generated</h2>
+
+<p><b>Attack:</b> ${data.type}</p>
+
+<p><b>Severity:</b> ${data.severity}</p>
+
+<p>
+SOC event successfully sent to dashboard.
+</p>
+
+</div>
+
+`;
+
 });
+
 }
+
 </script>
 
 </body>
