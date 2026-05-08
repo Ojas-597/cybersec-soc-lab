@@ -1,48 +1,23 @@
 const mongoose = require("mongoose");
 
+const QuerySchema =
+new mongoose.Schema({
 
-const querySchema = new mongoose.Schema({
+user:String,
 
-  user: {
+question:String,
 
-    type: String,
+response:Array,
 
-    required: true
-
-  },
-
-
-  question: {
-
-    type: String,
-
-    required: true
-
-  },
-
-
-  response: {
-
-    type: String,
-
-    required: true
-
-  },
-
-
-  time: {
-
-    type: Date,
-
-    default: Date.now
-
-  }
+timestamp:{
+type:Date,
+default:Date.now
+}
 
 });
 
-
 module.exports =
-  mongoose.model(
-    "Query",
-    querySchema
-  );
+mongoose.model(
+"Query",
+QuerySchema
+);
