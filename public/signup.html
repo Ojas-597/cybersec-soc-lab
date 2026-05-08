@@ -1,71 +1,66 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
-  <title>Signup</title>
-
+  <title>Enterprise SOC Signup</title>
   <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
 <div class="auth-box">
 
   <h1>
-    📝 Create Account
+    📝 SOC Registration
   </h1>
 
-  <form
-    action="/signup"
-    method="POST"
+  <p style="text-align:center; color:#94a3b8;">
+
+    Create account for
+    Enterprise SOC Platform
+
+  </p>
+
+  <br>
+
+  <!-- ================= FORM ================= -->
+
+  <input
+    type="text"
+    id="username"
+    placeholder="Username"
+    required
   >
 
-    <input
-      type="text"
-      name="username"
-      placeholder="Username"
-      required
-    >
+  <input
+    type="password"
+    id="password"
+    placeholder="Password"
+    required
+  >
 
-    <input
-      type="password"
-      name="password"
-      placeholder="Password"
-      required
-    >
+  <!-- ROLE -->
+  <select id="role">
 
-    <select
-      name="role"
-      required
-    >
+    <option value="">
+      Select Role
+    </option>
 
-      <option value="">
-        Select Role
-      </option>
+    <option value="user">
+      User
+    </option>
 
-      <option value="user">
-        User
-      </option>
+    <option value="analyst">
+      Analyst
+    </option>
 
-      <option value="analyst">
-        Analyst
-      </option>
+  </select>
 
-      <option value="admin">
-        Admin
-      </option>
+  <button onclick="signup()">
 
-    </select>
+    Create Account
 
-    <button type="submit">
+  </button>
 
-      Signup
-
-    </button>
-
-  </form>
+  <div id="msg"></div>
 
   <br>
 
@@ -74,14 +69,114 @@
     Already have account?
 
     <a href="login.html">
-
       Login
-
     </a>
 
   </p>
 
 </div>
+
+<script>
+
+/* ================= SIGNUP ================= */
+
+function signup(){
+
+const username =
+document.getElementById("username").value;
+
+const password =
+document.getElementById("password").value;
+
+const role =
+document.getElementById("role").value;
+
+/* VALIDATION */
+if(
+username.trim()==="" ||
+password.trim()==="" ||
+role.trim()===""
+){
+
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:red; margin-top:15px;">
+
+Please fill all fields
+
+</p>
+
+`;
+
+return;
+
+}
+
+/* REQUEST */
+fetch("/signup",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+username,
+password,
+role
+
+})
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:lime; margin-top:15px;">
+
+Account created successfully
+
+</p>
+
+`;
+
+/* REDIRECT */
+setTimeout(()=>{
+
+window.location.href =
+"login.html";
+
+},1500);
+
+})
+
+.catch(err=>{
+
+console.error(err);
+
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:red; margin-top:15px;">
+
+Signup failed
+
+</p>
+
+`;
+
+});
+
+}
+
+</script>
 
 </body>
 </html>
