@@ -21,8 +21,7 @@
 
   <br>
 
-  <!-- ================= LOGIN FORM ================= -->
-
+  <!-- USERNAME -->
   <input
     type="text"
     id="username"
@@ -30,6 +29,7 @@
     required
   >
 
+  <!-- PASSWORD -->
   <input
     type="password"
     id="password"
@@ -40,8 +40,16 @@
   <!-- ROLE -->
   <select id="role">
 
+    <option value="">
+      Select Role
+    </option>
+
     <option value="user">
-      User / Analyst
+      User
+    </option>
+
+    <option value="analyst">
+      Analyst
     </option>
 
     <option value="admin">
@@ -74,7 +82,7 @@
 
 /* ================= LOGIN ================= */
 
-function login(){
+async function login(){
 
 const username =
 document.getElementById("username").value;
@@ -85,10 +93,11 @@ document.getElementById("password").value;
 const role =
 document.getElementById("role").value;
 
-/* EMPTY CHECK */
+/* VALIDATION */
 if(
 username.trim()==="" ||
-password.trim()===""
+password.trim()==="" ||
+role.trim()===""
 ){
 
 document.getElementById("msg")
@@ -106,8 +115,9 @@ return;
 
 }
 
-/* LOGIN REQUEST */
-fetch("/login",{
+try{
+
+const res = await fetch("/login",{
 
 method:"POST",
 
@@ -123,19 +133,35 @@ role
 
 })
 
-})
+});
 
-.then(r=>r.json())
+const data = await res.json();
 
-.then(data=>{
+/* LOGIN FAIL */
+if(!res.ok){
 
-/* STORE TOKEN */
+document.getElementById("msg")
+.innerHTML = `
+
+<p style="color:red; margin-top:15px;">
+
+${data.error || "Login failed"}
+
+</p>
+
+`;
+
+return;
+
+}
+
+/* SAVE TOKEN */
 localStorage.setItem(
 "token",
 data.token
 );
 
-/* STORE ROLE */
+/* SAVE ROLE */
 localStorage.setItem(
 "role",
 data.role
@@ -161,9 +187,9 @@ window.location.href =
 
 },1000);
 
-})
+}
 
-.catch(err=>{
+catch(err){
 
 console.error(err);
 
@@ -172,13 +198,13 @@ document.getElementById("msg")
 
 <p style="color:red; margin-top:15px;">
 
-Login failed
+Server error
 
 </p>
 
 `;
 
-});
+}
 
 }
 
