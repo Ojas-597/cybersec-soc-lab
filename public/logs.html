@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Enterprise SOC Logs</title>
+  <title>SOC Activity Logs</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,17 +37,38 @@
 <div class="container">
 
 <h1>
-📡 Real-Time SOC Activity Monitoring
+📡 Real-Time SOC Activity Logs
 </h1>
 
 <p style="margin-top:10px; color:#64748b;">
 
-This section displays real user-generated
-SOC activities and incident workflows.
+Only real user-generated activities
+are stored and displayed here.
 
 </p>
 
-<div id="logs"></div>
+<div class="card" style="margin-top:25px;">
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>User</th>
+<th>Action</th>
+<th>Severity</th>
+<th>Time</th>
+
+</tr>
+
+</thead>
+
+<tbody id="logs"></tbody>
+
+</table>
+
+</div>
 
 </div>
 
@@ -75,31 +96,17 @@ const data = await res.json();
 document.getElementById("logs")
 .innerHTML = data.map(log=>`
 
-<div class="card" style="margin-top:20px;">
+<tr>
 
-<h3>
-🚨 SOC Activity
-</h3>
-
-<p>
-
-<b>User:</b>
-
+<td>
 ${log.user}
+</td>
 
-</p>
-
-<p>
-
-<b>Action:</b>
-
+<td>
 ${log.action}
+</td>
 
-</p>
-
-<p>
-
-<b>Severity:</b>
+<td>
 
 <span class="badge">
 
@@ -107,18 +114,16 @@ ${log.severity}
 
 </span>
 
-</p>
+</td>
 
-<p>
-
-<b>Timestamp:</b>
+<td>
 
 ${new Date(log.createdAt)
 .toLocaleString()}
 
-</p>
+</td>
 
-</div>
+</tr>
 
 `).join("");
 
@@ -128,27 +133,14 @@ catch(err){
 
 console.error(err);
 
-document.getElementById("logs")
-.innerHTML = `
-
-<div class="card">
-
-<h3>
-❌ Failed to load logs
-</h3>
-
-</div>
-
-`;
-
 }
 
 }
 
-/* INITIAL LOAD */
 loadLogs();
 
 /* AUTO REFRESH */
+
 setInterval(loadLogs,5000);
 
 </script>
