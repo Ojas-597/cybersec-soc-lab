@@ -1,42 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Evidence</title>
+  <title>Upload Security Evidence</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+<div class="logo">
+📤 Security Evidence Upload
+</div>
+
+<div class="nav-links">
+
+<a href="dashboard.html">Dashboard</a>
+<a href="report.html">Reports</a>
+<a href="query.html">Query</a>
+<a href="/logout">Logout</a>
+
+</div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
 <div class="container">
 
 <div class="card">
 
-<h1>📤 Upload Security Evidence</h1>
+<h1>Upload Security Evidence</h1>
 
-<form>
+<p>
+Upload logs, screenshots,
+or captured SOC evidence.
+</p>
 
-<input type="file">
-<br><br>
+<form id="uploadForm">
 
-<textarea placeholder="Describe evidence..."></textarea>
-<br><br>
+<input
+type="file"
+id="file"
+required
+>
 
-<button>Upload</button>
+<textarea
+id="description"
+placeholder="Describe uploaded evidence..."
+required
+></textarea>
+
+<button type="submit">
+Upload Evidence
+</button>
 
 </form>
 
 </div>
 
+<div id="result"></div>
+
 </div>
 
 <script>
-fetch("/me")
-.then(r=>r.json())
-.then(data=>{
-  if(data.user.role !== "admin"){
-    alert("Access Denied");
-    window.location.href="dashboard.html";
-  }
+
+const token = localStorage.getItem("token");
+
+/* ================= UPLOAD ================= */
+
+document
+.getElementById("uploadForm")
+
+.addEventListener("submit", async e=>{
+
+e.preventDefault();
+
+const file =
+document.getElementById("file").files[0];
+
+const description =
+document.getElementById("description").value;
+
+/* FORM DATA */
+const formData = new FormData();
+
+formData.append("file", file);
+
+formData.append(
+"description",
+description
+);
+
+/* SEND */
+const res = await fetch("/upload",{
+
+method:"POST",
+
+headers:{
+Authorization:"Bearer "+token
+},
+
+body:formData
+
 });
+
+const data = await res.json();
+
+/* RESULT */
+document.getElementById("result")
+.innerHTML = `
+
+<div class="card">
+
+<h2>✅ Evidence Uploaded</h2>
+
+<p><b>Filename:</b> ${data.filename}</p>
+
+<p><b>Description:</b>
+${data.description}
+</p>
+
+<p><b>Status:</b>
+Stored successfully
+</p>
+
+</div>
+
+`;
+
+});
+
 </script>
 
 </body>
