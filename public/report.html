@@ -6,17 +6,78 @@
 </head>
 <body>
 
+<div class="navbar">
+
+<div class="logo">
+📄 SOC Incident Report
+</div>
+
+<div class="nav-links">
+
+<a href="dashboard.html">Dashboard</a>
+<a href="logs.html">Logs</a>
+<a href="/logout">Logout</a>
+
+</div>
+
+</div>
+
 <div class="container">
 
 <div class="card">
-<h1>📄 SOC Report</h1>
-<p>Auto-generated incident summary</p>
 
-<button onclick="window.print()">Download</button>
+<h1>Generated SOC Report</h1>
+
+<div id="report"></div>
+
+<button onclick="window.print()">
+🖨 Download / Print Report
+</button>
 
 </div>
 
 </div>
+
+<script>
+
+const token = localStorage.getItem("token");
+
+fetch("/report/data",{
+
+headers:{
+Authorization:"Bearer "+token
+}
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("report")
+.innerHTML = data.map(d=>`
+
+<div class="card">
+
+<h3>${d.type}</h3>
+
+<p><b>User:</b> ${d.user}</p>
+
+<p><b>Severity:</b> ${d.severity}</p>
+
+<p><b>Source:</b> ${d.source}</p>
+
+<p><b>Time:</b>
+${new Date(d.timestamp).toLocaleString()}
+</p>
+
+</div>
+
+`).join("");
+
+});
+
+</script>
 
 </body>
 </html>
