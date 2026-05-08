@@ -1,233 +1,150 @@
 const express = require("express");
-
-const bcrypt = require("bcrypt");
-
-const User = require("../models/User");
-
-const Log = require("../models/Logs");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
+const User = require("../models/User");
 
-/* =========================
-   📝 SIGNUP
-========================= */
+const { auth } =
+require("../middleware/authMiddleware");
 
-router.post("/signup", async (req, res) => {
+/* ================= SIGNUP ================= */
 
-  try {
+router.post("/signup", async (req,res)=>{
 
-    const {
-      username,
-      password,
-      role
-    } = req.body;
+try{
 
+const {
+username,
+password,
+role
+} = req.body;
 
-    if (!username || !password) {
+/* CHECK EXISTING */
+const existing =
+await User.findOne({
+username
+});
 
-      return res.send(
-        "All fields required"
-      );
+if(existing){
 
-    }
+return res.status(400).json({
 
-
-    const existingUser =
-      await User.findOne({
-        username
-      });
-
-
-    if (existingUser) {
-
-      return res.send(
-        "User already exists"
-      );
-
-    }
-
-
-    const hashedPassword =
-      await bcrypt.hash(password, 10);
-
-
-    await User.create({
-
-      username,
-
-      password: hashedPassword,
-
-      role: role || "user"
-
-    });
-
-
-    await Log.create({
-
-      message:
-        `New user registered: ${username}`,
-
-      level: "INFO"
-
-    });
-
-
-    console.log(
-      `✅ Signup successful: ${username}`
-    );
-
-
-    res.redirect("/login.html");
-
-  }
-
-  catch (err) {
-
-    console.error(
-      "❌ SIGNUP ERROR"
-    );
-
-    console.error(err);
-
-    res.send("Signup error");
-
-  }
+error:"User already exists"
 
 });
 
+}
 
-/* =========================
-   🔐 LOGIN
-========================= */
+/* CREATE USER */
+await User.create({
 
-router.post("/login", async (req, res) => {
-
-  try {
-
-    const {
-      username,
-      password
-    } = req.body;
-
-
-    const user =
-      await User.findOne({
-        username
-      });
-
-
-    if (!user) {
-
-      return res.send(
-        "User not found"
-      );
-
-    }
-
-
-    const validPassword =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
-
-
-    if (!validPassword) {
-
-      return res.send(
-        "Wrong password"
-      );
-
-    }
-
-
-    req.session.user = {
-
-      id: user._id,
-
-      username: user.username,
-
-      role: user.role
-
-    };
-
-
-    await Log.create({
-
-      message:
-        `User logged in: ${user.username}`,
-
-      level: "INFO"
-
-    });
-
-
-    console.log(
-      `✅ Login successful: ${user.username}`
-    );
-
-
-    res.redirect("/dashboard.html");
-
-  }
-
-  catch (err) {
-
-    console.error(
-      "❌ LOGIN ERROR"
-    );
-
-    console.error(err);
-
-    res.send("Login error");
-
-  }
+username,
+password,
+role
 
 });
 
+res.json({
 
-/* =========================
-   👤 CURRENT USER
-========================= */
-
-router.get("/me", (req, res) => {
-
-  if (!req.session.user) {
-
-    return res.status(401).json({
-
-      loggedIn: false
-
-    });
-
-  }
-
-
-  res.json({
-
-    loggedIn: true,
-
-    user: req.session.user
-
-  });
+success:true
 
 });
 
+}
 
-/* =========================
-   🚪 LOGOUT
-========================= */
+catch(err){
 
-router.get("/logout", (req, res) => {
+res.status(500).json({
 
-  req.session.destroy(() => {
-
-    res.redirect("/login.html");
-
-  });
+error:"Signup failed"
 
 });
 
+}
+
+});
+
+/* ================= LOGIN ================= */
+
+router.post("/login", async (req,res)=>{
+
+try{
+
+const {
+username,
+password,
+role
+} = req.body;
+
+/* FIND USER */
+const user =
+await User.findOne({
+
+username,
+password,
+role
+
+});
+
+if(!user){
+
+return res.status(401).json({
+
+error:"Invalid credentials"
+
+});
+
+}
+
+/* TOKEN */
+const token = jwt.sign({
+
+username:user.username,
+role:user.role
+
+},
+
+process.env.JWT_SECRET,
+
+{
+
+expiresIn:"2h"
+
+});
+
+/* RESPONSE */
+res.json({
+
+token,
+role:user.role
+
+});
+
+}
+
+catch(err){
+
+res.status(500).json({
+
+error:"Login failed"
+
+});
+
+}
+
+});
+
+/* ================= CURRENT USER ================= */
+
+router.get("/me",
+
+auth,
+
+(req,res)=>{
+
+res.json(req.user);
+
+});
 
 module.exports = router;
