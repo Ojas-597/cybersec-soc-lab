@@ -1,81 +1,90 @@
-module.exports = {
+const jwt = require("jsonwebtoken");
 
-  /* =========================
-     🔐 CHECK LOGIN
-  ========================= */
+/* ================= AUTH ================= */
 
-  isAuth: (req, res, next) => {
+function auth(req, res, next) {
 
-    if (!req.session.user) {
+  const header =
+  req.headers.authorization;
 
-      return res.status(401).json({
+  /* NO HEADER */
+  if (!header) {
 
-        success: false,
+    return res.status(401).json({
 
-        message: "❌ Please login first"
+      error: "No token provided"
 
-      });
+    });
 
-    }
+  }
 
-    next();
+  try {
 
-  },
+    /* GET TOKEN */
+    const token =
+    header.split(" ")[1];
 
+    /* VERIFY */
+    const decoded =
+    jwt.verify(
 
-  /* =========================
-     👑 ADMIN ONLY
-  ========================= */
+      token,
 
-  isAdmin: (req, res, next) => {
+      process.env.JWT_SECRET
 
-    if (
-      !req.session.user ||
-      req.session.user.role !== "admin"
-    ) {
+    );
 
-      return res.status(403).json({
-
-        success: false,
-
-        message: "❌ Admin access only"
-
-      });
-
-    }
-
-    next();
-
-  },
-
-
-  /* =========================
-     🧪 ANALYST + ADMIN
-  ========================= */
-
-  isAnalyst: (req, res, next) => {
-
-    if (
-
-      !req.session.user ||
-
-      !["admin", "analyst"]
-      .includes(req.session.user.role)
-
-    ) {
-
-      return res.status(403).json({
-
-        success: false,
-
-        message: "❌ Analyst access only"
-
-      });
-
-    }
+    /* SAVE USER */
+    req.user = decoded;
 
     next();
 
   }
+
+  catch (err) {
+
+    return res.status(401).json({
+
+      error: "Invalid token"
+
+    });
+
+  }
+
+}
+
+/* ================= ROLE CHECK ================= */
+
+function roleCheck(...roles) {
+
+  return (req, res, next) => {
+
+    /* ACCESS CHECK */
+    if (
+
+      !roles.includes(
+        req.user.role
+      )
+
+    ) {
+
+      return res.status(403).json({
+
+        error: "Access denied"
+
+      });
+
+    }
+
+    next();
+
+  };
+
+}
+
+module.exports = {
+
+  auth,
+  roleCheck
 
 };
