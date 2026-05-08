@@ -14,24 +14,21 @@ roleCheck
 
 /* ================= GET LOGS ================= */
 
-router.get("/logs",
+app.get(
+
+"/logs",
 
 auth,
 
-roleCheck("admin"),
+roleCheck("admin","analyst"),
 
-async (req,res)=>{
+async(req,res)=>{
 
 try{
 
-const logs =
-await Log.find()
+const logs = await Log.find()
 
-.sort({
-
-timestamp:-1
-
-})
+.sort({createdAt:-1})
 
 .limit(100);
 
@@ -41,9 +38,11 @@ res.json(logs);
 
 catch(err){
 
+console.error(err);
+
 res.status(500).json({
 
-error:"Failed to load logs"
+error:"Failed to fetch logs"
 
 });
 
