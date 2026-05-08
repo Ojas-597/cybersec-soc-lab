@@ -1,233 +1,131 @@
 const express = require("express");
 
-const Query = require("../models/Query");
-
-const Log = require("../models/Logs");
-
-const {
-  isAuth
-} = require("../middleware/auth");
-
 const router = express.Router();
 
+const Query =
+require("../models/Query");
 
-/* =========================
-   🤖 AI THREAT ANALYZER
-========================= */
+const Log =
+require("../models/Logs");
 
-router.post("/ask", isAuth, async (req, res) => {
+const { auth } =
+require("../middleware/authMiddleware");
 
-  try {
+const attacks =
+require("../data/attacks");
 
-    if (!req.body.question) {
+/* ================= CREATE EVENT ================= */
 
-      return res.status(400).send(
-        "Question required"
-      );
+async function createEvent(
 
-    }
+user,
+type,
+severity,
+source,
+description
 
+){
 
-    let q =
-      req.body.question.toLowerCase();
+await Logs.create({
 
-    let results = [];
+user,
+type,
+severity,
+source,
+description,
 
-
-    /* =========================
-       SQL INJECTION
-    ========================= */
-
-    if (
-      q.includes("login") ||
-      q.includes("bypass") ||
-      q.includes("sql")
-    ) {
-
-      results.push({
-
-        attack: "SQL Injection",
-
-        severity: "HIGH",
-
-        tool:
-          "Burp Suite / SQLmap",
-
-        solution:
-          "Use prepared statements",
-
-        confidence: "85%"
-
-      });
-
-    }
-
-
-    /* =========================
-       PHISHING
-    ========================= */
-
-    if (
-      q.includes("phishing") ||
-      q.includes("fake email")
-    ) {
-
-      results.push({
-
-        attack: "Phishing",
-
-        severity: "HIGH",
-
-        tool:
-          "SET Toolkit",
-
-        solution:
-          "User awareness training",
-
-        confidence: "80%"
-
-      });
-
-    }
-
-
-    /* =========================
-       PORT SCAN
-    ========================= */
-
-    if (
-      q.includes("port") ||
-      q.includes("open port") ||
-      q.includes("scan")
-    ) {
-
-      results.push({
-
-        attack: "Port Scanning",
-
-        severity: "MEDIUM",
-
-        tool: "Nmap",
-
-        solution:
-          "Close unused ports",
-
-        confidence: "70%"
-
-      });
-
-    }
-
-
-    /* =========================
-       NETWORK TRAFFIC
-    ========================= */
-
-    if (
-      q.includes("traffic") ||
-      q.includes("slow") ||
-      q.includes("sniff")
-    ) {
-
-      results.push({
-
-        attack: "Packet Sniffing",
-
-        severity: "MEDIUM",
-
-        tool: "Wireshark",
-
-        solution:
-          "Monitor suspicious packets",
-
-        confidence: "65%"
-
-      });
-
-    }
-
-
-    /* =========================
-       UNKNOWN
-    ========================= */
-
-    if (results.length === 0) {
-
-      results.push({
-
-        attack: "Unknown Threat",
-
-        severity: "LOW",
-
-        tool: "Nmap",
-
-        solution:
-          "Perform detailed investigation",
-
-        confidence: "40%"
-
-      });
-
-    }
-
-
-    /* =========================
-       SAVE QUERY
-    ========================= */
-
-    await Query.create({
-
-      user:
-        req.session.user.username,
-
-      question:
-        req.body.question,
-
-      response:
-        JSON.stringify(results)
-
-    });
-
-
-    /* =========================
-       SAVE LOG
-    ========================= */
-
-    await Log.create({
-
-      message:
-        `Threat analyzed for ${req.session.user.username}: ${results.map(r => r.attack).join(", ")}`,
-
-      level:
-        results[0].severity
-
-    });
-
-
-    console.log(
-      `🚨 Threat detected: ${results[0].attack}`
-    );
-
-
-    res.json(results);
-
-  }
-
-  catch (err) {
-
-    console.error(
-      "❌ QUERY ERROR"
-    );
-
-    console.error(err);
-
-    res.status(500).send(
-      "Server Error"
-    );
-
-  }
+timestamp:new Date()
 
 });
 
+}
+
+/* ================= AI QUERY ================= */
+
+router.post("/ask",
+
+auth,
+
+async (req,res)=>{
+
+try{
+
+const q =
+req.body.question.toLowerCase();
+
+let results = [];
+
+/* ATTACK MATCH */
+const matches =
+attacks.filter(a=>
+q.includes(a.keyword)
+);
+
+/* UNKNOWN */
+if(matches.length===0){
+
+matches.push({
+
+attack:"Unknown Threat",
+
+severity:"LOW",
+
+tool:"Manual Investigation",
+
+solution:
+"Further investigation required",
+
+confidence:"70%"
+
+});
+
+}
+
+/* SAVE RESULTS */
+for(const a of matches){
+
+results.push(a);
+
+/* LOG */
+await createEvent(
+
+req.user.username,
+a.attack,
+a.severity,
+"AI Threat Engine",
+q
+
+);
+
+}
+
+/* SAVE QUERY */
+await Query.create({
+
+user:req.user.username,
+
+question:q,
+
+response:results,
+
+timestamp:new Date()
+
+});
+
+res.json(results);
+
+}
+
+catch(err){
+
+res.status(500).json({
+
+error:"Threat analysis failed"
+
+});
+
+}
+
+});
 
 module.exports = router;
