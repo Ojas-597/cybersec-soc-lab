@@ -1,92 +1,442 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SOC Dashboard</title>
+  <title>Master SOC Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- ================= NAVBAR ================= -->
 <div class="navbar">
-  <div class="logo">📊 SOC Dashboard</div>
+
+  <div class="logo">
+    📊 MASTER SOC Dashboard
+  </div>
 
   <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="search.html">Search</a>
-    <a href="lab.html">Lab</a>
-    <a href="query.html">Query</a>
-    <a href="report.html">Report</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="/logout">Logout</a>
+
+    <a href="dashboard.html">
+      Dashboard
+    </a>
+
+    <a href="search.html">
+      Search
+    </a>
+
+    <a href="lab.html">
+      Lab
+    </a>
+
+    <a href="query.html">
+      Query
+    </a>
+
+    <a href="report.html">
+      Report
+    </a>
+
+    <a href="quiz.html">
+      Quiz
+    </a>
+
+    <a href="upload.html">
+      Upload
+    </a>
+
+    <!-- ADMIN ONLY -->
+    <a href="logs.html" id="logsLink">
+      Logs
+    </a>
+
+    <!-- ADMIN ONLY -->
+    <a href="admin.html" id="adminLink">
+      Admin
+    </a>
+
+    <a href="/logout">
+      Logout
+    </a>
+
   </div>
+
 </div>
 
+<!-- ================= MAIN ================= -->
 <div class="container">
 
 <h1>🧠 SOC Monitoring Center</h1>
 
+<p>
+Monitor cybersecurity threats,
+analyze suspicious activity,
+and manage SOC operations.
+</p>
+
+<!-- ================= STATS ================= -->
 <div class="card-grid">
-  <div class="card"><h3>Total</h3><h1 id="t">0</h1></div>
-  <div class="card"><h3>High</h3><h1 id="h">0</h1></div>
-  <div class="card"><h3>Critical</h3><h1 id="c">0</h1></div>
+
+  <div class="card">
+
+    <h3>Total Incidents</h3>
+
+    <h1 id="total">
+      0
+    </h1>
+
+  </div>
+
+  <div class="card">
+
+    <h3>High Severity</h3>
+
+    <h1 id="high">
+      0
+    </h1>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Critical Threats</h3>
+
+    <h1 id="critical">
+      0
+    </h1>
+
+  </div>
+
 </div>
 
+<!-- ================= AI ANALYZER ================= -->
 <div class="card">
-  <h2>🤖 AI Analyzer</h2>
-  <input id="q">
-  <button onclick="ask()">Analyze</button>
+
+  <h2>🤖 AI Threat Analyzer</h2>
+
+  <p>
+    Enter suspicious activity,
+    attack symptoms,
+    or security concerns.
+  </p>
+
+  <br>
+
+  <input
+    id="q"
+    placeholder="Example: SQL Injection login bypass"
+  >
+
+  <button onclick="ask()">
+    Analyze Threat
+  </button>
+
   <div id="res"></div>
+
 </div>
 
+<!-- ================= LIVE FEED ================= -->
 <div class="card">
+
   <h2>📡 Live SOC Feed</h2>
+
   <div id="feed"></div>
-</div>
 
 </div>
 
+</div>
+
+<!-- ================= SOCKET ================= -->
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
 
-const token = localStorage.getItem("token");
+const token =
+localStorage.getItem("token");
 
-/* STATS */
-function load(){
-fetch("/stats",{headers:{Authorization:"Bearer "+token}})
-.then(r=>r.json())
-.then(d=>{
-  document.getElementById("t").innerText=d.total;
-  document.getElementById("h").innerText=d.high;
-  document.getElementById("c").innerText=d.critical;
-});
+/* ================= AUTH CHECK ================= */
+
+if(!token){
+
+  window.location.href =
+  "/login.html";
+
 }
-load();
-setInterval(load,5000);
 
-/* AI */
-function ask(){
-fetch("/ask",{
-method:"POST",
+/* ================= ROLE CHECK ================= */
+
+fetch("/me",{
+
 headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-body:JSON.stringify({question:document.getElementById("q").value})
-})
-.then(r=>r.json())
-.then(d=>{
-document.getElementById("res").innerHTML =
-d.map(x=>`<div class="card"><b>${x.attack}</b><p>${x.solution}</p></div>`).join("");
-});
+Authorization:"Bearer " + token
 }
 
-/* SOCKET */
+})
+
+.then(r=>r.json())
+
+.then(user=>{
+
+  console.log(
+    "Logged in as:",
+    user.role
+  );
+
+  /* ================= USER RESTRICTIONS ================= */
+
+  if(user.role !== "admin"){
+
+    document
+      .getElementById("logsLink")
+      .style.display = "none";
+
+    document
+      .getElementById("adminLink")
+      .style.display = "none";
+
+  }
+
+})
+
+.catch(()=>{
+
+  localStorage.removeItem("token");
+
+  window.location.href =
+  "/login.html";
+
+});
+
+/* ================= STATS ================= */
+
+function loadStats(){
+
+fetch("/stats",{
+
+headers:{
+Authorization:"Bearer " + token
+}
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+  document.getElementById("total")
+    .innerText = data.total;
+
+  document.getElementById("high")
+    .innerText = data.high;
+
+  document.getElementById("critical")
+    .innerText = data.critical;
+
+})
+
+.catch(err=>{
+
+console.error(err);
+
+});
+
+}
+
+/* INITIAL LOAD */
+loadStats();
+
+/* AUTO REFRESH */
+setInterval(loadStats,5000);
+
+/* ================= AI ANALYZER ================= */
+
+function ask(){
+
+const question =
+document.getElementById("q").value;
+
+/* EMPTY CHECK */
+if(question.trim()===""){
+
+  alert(
+    "Please enter security issue"
+  );
+
+  return;
+
+}
+
+fetch("/ask",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json",
+
+Authorization:"Bearer " + token
+
+},
+
+body:JSON.stringify({
+
+question
+
+})
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("res")
+.innerHTML = data.map(d=>`
+
+<div class="card">
+
+<h3>
+🚨 ${d.attack}
+</h3>
+
+<p>
+
+<b>Severity:</b>
+
+<span class="${d.severity.toLowerCase()}">
+
+${d.severity}
+
+</span>
+
+</p>
+
+<p>
+
+<b>Tool:</b>
+
+${d.tool}
+
+</p>
+
+<p>
+
+<b>Solution:</b>
+
+${d.solution}
+
+</p>
+
+<p>
+
+<b>Confidence:</b>
+
+${d.confidence}
+
+</p>
+
+</div>
+
+`).join("");
+
+})
+
+.catch(err=>{
+
+console.error(err);
+
+document.getElementById("res")
+.innerHTML = `
+
+<div class="card">
+
+<h3>❌ Error</h3>
+
+<p>
+Threat analysis failed
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+/* ================= SOCKET ================= */
+
 const socket = io();
 
+const feed =
+document.getElementById("feed");
+
 socket.on("soc_event", e=>{
-document.getElementById("feed").innerHTML =
-`<div class="card">${e.type} | ${e.severity} | ${e.user}</div>`
-+ document.getElementById("feed").innerHTML;
+
+feed.innerHTML = `
+
+<div class="card">
+
+<h3>
+🚨 SOC Event
+</h3>
+
+<p>
+
+<b>User:</b>
+
+${e.user}
+
+</p>
+
+<p>
+
+<b>Attack:</b>
+
+${e.type}
+
+</p>
+
+<p>
+
+<b>Severity:</b>
+
+<span class="${e.severity.toLowerCase()}">
+
+${e.severity}
+
+</span>
+
+</p>
+
+<p>
+
+<b>Source:</b>
+
+${e.source}
+
+</p>
+
+<p>
+
+<b>Time:</b>
+
+${new Date(e.timestamp)
+.toLocaleString()}
+
+</p>
+
+</div>
+
+` + feed.innerHTML;
+
+/* LIMIT FEED */
+if(feed.children.length > 20){
+
+feed.removeChild(
+feed.lastChild
+);
+
+}
+
 });
 
 </script>
