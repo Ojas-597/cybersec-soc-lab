@@ -1,21 +1,245 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
+  <title>Enterprise SOC Admin Panel</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+  <div class="logo">
+    👑 Enterprise SOC Admin
+  </div>
+
+  <div class="nav-links">
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="query.html">Query Console</a>
+    <a href="lab.html">Lab</a>
+    <a href="report.html">Reports</a>
+    <a href="upload.html">Evidence Upload</a>
+    <a href="logs.html">SOC Logs</a>
+    <a href="quiz-results.html">Quiz Results</a>
+    <a href="/logout">Logout</a>
+
+  </div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
 <div class="container">
 
+<h1>🧠 Security Operations Administration Center</h1>
+
+<p>
+Monitor analysts, manage users,
+review incidents, and supervise SOC activity.
+</p>
+
+<!-- ================= ADMIN STATS ================= -->
+<div class="card-grid">
+
 <div class="card">
-<h1>👑 Admin Control</h1>
-<button>View Users</button>
-<button>Clear Logs</button>
-<button>System Scan</button>
+<h3>Total Users</h3>
+<h1 id="usersCount">0</h1>
+</div>
+
+<div class="card">
+<h3>Total SOC Events</h3>
+<h1 id="eventsCount">0</h1>
+</div>
+
+<div class="card">
+<h3>Critical Threats</h3>
+<h1 id="criticalCount">0</h1>
+</div>
+
+<div class="card">
+<h3>Evidence Uploads</h3>
+<h1 id="uploadCount">0</h1>
 </div>
 
 </div>
+
+<!-- ================= USER MANAGEMENT ================= -->
+<div class="card">
+
+<h2>👥 User Management</h2>
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Username</th>
+<th>Role</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="users"></tbody>
+
+</table>
+
+</div>
+
+<!-- ================= RECENT EVENTS ================= -->
+<div class="card">
+
+<h2>📡 Recent SOC Events</h2>
+
+<div id="events"></div>
+
+</div>
+
+<!-- ================= QUIZ ANALYTICS ================= -->
+<div class="card">
+
+<h2>📝 Quiz Performance Analytics</h2>
+
+<div id="quizResults">
+
+<div class="card">
+<p><b>Analyst1:</b> 85%</p>
+</div>
+
+<div class="card">
+<p><b>User2:</b> 92%</p>
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= EVIDENCE ================= -->
+<div class="card">
+
+<h2>📤 Uploaded Evidence Review</h2>
+
+<div id="evidence">
+
+<div class="card">
+<p>Suspicious login screenshot uploaded.</p>
+</div>
+
+<div class="card">
+<p>DDoS traffic log uploaded.</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const token = localStorage.getItem("token");
+
+/* ================= LOAD USERS ================= */
+fetch("/users",{
+
+headers:{
+Authorization:"Bearer "+token
+}
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("usersCount")
+.innerText = data.length;
+
+document.getElementById("users")
+.innerHTML = data.map(u=>`
+
+<tr>
+
+<td>${u.username}</td>
+
+<td>${u.role}</td>
+
+<td>
+<span class="badge">
+Active
+</span>
+</td>
+
+<td>
+
+<button>
+Monitor
+</button>
+
+<button>
+Disable
+</button>
+
+</td>
+
+</tr>
+
+`).join("");
+
+});
+
+
+/* ================= LOAD LOGS ================= */
+fetch("/logs",{
+
+headers:{
+Authorization:"Bearer "+token
+}
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("eventsCount")
+.innerText = data.length;
+
+let critical =
+data.filter(x=>x.severity==="CRITICAL").length;
+
+document.getElementById("criticalCount")
+.innerText = critical;
+
+document.getElementById("events")
+.innerHTML = data.map(log=>`
+
+<div class="card">
+
+<h3>${log.type}</h3>
+
+<p><b>User:</b> ${log.user}</p>
+
+<p><b>Severity:</b> ${log.severity}</p>
+
+<p><b>Source:</b> ${log.source}</p>
+
+<p>
+${new Date(log.timestamp)
+.toLocaleString()}
+</p>
+
+</div>
+
+`).join("");
+
+});
+
+
+/* ================= MOCK EVIDENCE COUNT ================= */
+document.getElementById("uploadCount")
+.innerText = 2;
+
+</script>
 
 </body>
 </html>
