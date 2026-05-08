@@ -1,187 +1,27 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
-  <title>SOC Logs</title>
-
+  <title>Logs</title>
   <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
 <div class="container">
 
-  <h1>
-    📡 SOC Logs
-  </h1>
-
-  <table class="table">
-
-    <thead>
-
-      <tr>
-
-        <th>Level</th>
-
-        <th>Message</th>
-
-        <th>Time</th>
-
-      </tr>
-
-    </thead>
-
-    <tbody id="logs"></tbody>
-
-  </table>
+<div class="card">
+<h1>📜 SOC Logs</h1>
+<div id="logs"></div>
+</div>
 
 </div>
 
-
 <script>
-
-/* =========================
-   ROLE CHECK
-========================= */
-
-fetch("/me")
-
-.then(res => res.json())
-
-.then(data => {
-
-  if (
-    !data.loggedIn ||
-    !["admin", "analyst"]
-      .includes(data.user.role)
-  ) {
-
-    alert("❌ Access Denied");
-
-    window.location.href =
-      "/dashboard.html";
-
-  }
-
+fetch("/logs",{headers:{Authorization:"Bearer "+localStorage.getItem("token")}})
+.then(r=>r.json())
+.then(d=>{
+document.getElementById("logs").innerHTML =
+d.map(l=>`<div class="card">${l.type} | ${l.severity} | ${l.user}</div>`).join("");
 });
-
-
-const logsTable =
-  document.getElementById("logs");
-
-
-/* =========================
-   LOAD LOGS
-========================= */
-
-fetch("/logs")
-
-.then(res => {
-
-  if (!res.ok) {
-
-    throw new Error(
-      "Failed to fetch logs"
-    );
-
-  }
-
-  return res.json();
-
-})
-
-.then(data => {
-
-  logsTable.innerHTML = "";
-
-
-  if (data.length === 0) {
-
-    logsTable.innerHTML = `
-
-      <tr>
-
-        <td colspan="3">
-
-          No logs found
-
-        </td>
-
-      </tr>
-
-    `;
-
-    return;
-
-  }
-
-
-  data.forEach(addLog);
-
-})
-
-.catch(err => {
-
-  console.error(err);
-
-  logsTable.innerHTML = `
-
-    <tr>
-
-      <td colspan="3">
-
-        ❌ Failed to load logs
-
-      </td>
-
-    </tr>
-
-  `;
-
-});
-
-
-/* =========================
-   ADD LOG ROW
-========================= */
-
-function addLog(log) {
-
-  logsTable.innerHTML += `
-
-    <tr>
-
-      <td>
-
-        <span class="badge">
-
-          ${log.level}
-
-        </span>
-
-      </td>
-
-      <td>
-
-        ${log.message}
-
-      </td>
-
-      <td>
-
-        ${new Date(log.time)
-          .toLocaleString()}
-
-      </td>
-
-    </tr>
-
-  `;
-
-}
-
 </script>
 
 </body>
