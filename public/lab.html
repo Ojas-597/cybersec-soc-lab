@@ -1,91 +1,283 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Attack Simulation Lab</title>
+
+  <title>SOC Attack Simulation Lab</title>
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
+
+<!-- ================= NAVBAR ================= -->
 
 <div class="navbar">
 
-<div class="logo">
-🧪 SOC Attack Lab
+  <div class="logo">
+    🧪 SOC Attack Lab
+  </div>
+
+  <div class="nav-links">
+
+    <a href="dashboard.html">
+      Dashboard
+    </a>
+
+    <a href="search.html">
+      Search
+    </a>
+
+    <a href="query.html">
+      Query
+    </a>
+
+    <a href="report.html">
+      Reports
+    </a>
+
+    <a href="quiz.html">
+      Quiz
+    </a>
+
+    <a
+      href="upload.html"
+      id="uploadLink"
+    >
+      Upload
+    </a>
+
+    <a href="/logout">
+      Logout
+    </a>
+
+  </div>
+
 </div>
 
-<div class="nav-links">
-
-<a href="dashboard.html">Dashboard</a>
-<a href="search.html">Search</a>
-<a href="query.html">Query</a>
-<a href="report.html">Report</a>
-<a href="logs.html">Logs</a>
-<a href="/logout">Logout</a>
-
-</div>
-
-</div>
+<!-- ================= CONTENT ================= -->
 
 <div class="container">
 
-<h1>Attack Simulation Environment</h1>
+<h1>
+  🧠 Enterprise SOC Simulation Lab
+</h1>
+
+<p style="margin-top:10px; color:#64748b;">
+
+Simulate real-world cyber attacks,
+understand attack vectors,
+and analyze security incidents.
+
+</p>
+
+<!-- ================= LAB GRID ================= -->
 
 <div class="card-grid">
 
-<div class="card">
+  <!-- SQL -->
+  <div class="card">
 
-<h2>SQL Injection</h2>
+    <h2>
+      💉 SQL Injection
+    </h2>
 
-<p>
-Simulate database injection attack.
-</p>
+    <p>
 
-<button onclick="run('sql')">
-Run Simulation
-</button>
+      Simulate insecure login forms
+      vulnerable to database attacks.
+
+    </p>
+
+    <br>
+
+    <span class="badge">
+      HIGH RISK
+    </span>
+
+    <button onclick="simulate('SQL Injection')">
+
+      Start Simulation
+
+    </button>
+
+  </div>
+
+  <!-- XSS -->
+  <div class="card">
+
+    <h2>
+      ⚠ XSS Attack
+    </h2>
+
+    <p>
+
+      Learn reflected and stored
+      cross-site scripting attacks.
+
+    </p>
+
+    <br>
+
+    <span class="badge">
+      MEDIUM RISK
+    </span>
+
+    <button onclick="simulate('XSS Attack')">
+
+      Start Simulation
+
+    </button>
+
+  </div>
+
+  <!-- DDOS -->
+  <div class="card">
+
+    <h2>
+      🌐 DDoS Attack
+    </h2>
+
+    <p>
+
+      Simulate abnormal traffic floods
+      and network exhaustion attacks.
+
+    </p>
+
+    <br>
+
+    <span class="badge">
+      CRITICAL
+    </span>
+
+    <button onclick="simulate('DDoS Attack')">
+
+      Start Simulation
+
+    </button>
+
+  </div>
+
+  <!-- PHISHING -->
+  <div class="card">
+
+    <h2>
+      📧 Phishing Attack
+    </h2>
+
+    <p>
+
+      Analyze spoofed emails
+      and credential harvesting attempts.
+
+    </p>
+
+    <br>
+
+    <span class="badge">
+      HIGH RISK
+    </span>
+
+    <button onclick="simulate('Phishing')">
+
+      Start Simulation
+
+    </button>
+
+  </div>
 
 </div>
 
-<div class="card">
+<!-- ================= RESULT ================= -->
 
-<h2>XSS Attack</h2>
-
-<p>
-Simulate cross-site scripting attack.
-</p>
-
-<button onclick="run('xss')">
-Run Simulation
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>DDoS Attack</h2>
-
-<p>
-Simulate denial of service attack.
-</p>
-
-<button onclick="run('ddos')">
-Run Simulation
-</button>
+<div
+  class="result-box"
+  id="result"
+  style="display:none;"
+>
 
 </div>
 
 </div>
 
-<div id="output"></div>
-
-</div>
+<!-- ================= SCRIPT ================= -->
 
 <script>
 
-const token = localStorage.getItem("token");
+const token =
+localStorage.getItem("token");
 
-function run(type){
+/* ================= ROLE CHECK ================= */
 
-fetch("/lab/run",{
+fetch("/me",{
+
+headers:{
+Authorization:
+"Bearer " + token
+}
+
+})
+
+.then(r=>r.json())
+
+.then(user=>{
+
+/* ONLY ADMIN CAN UPLOAD */
+if(user.role !== "admin"){
+
+document
+.getElementById("uploadLink")
+.style.display = "none";
+
+}
+
+});
+
+/* ================= SIMULATION ================= */
+
+function simulate(type){
+
+document.getElementById("result")
+.style.display = "block";
+
+document.getElementById("result")
+.innerHTML = `
+
+<h2>
+🚨 Simulation Running
+</h2>
+
+<br>
+
+<p>
+
+Attack Type:
+<b>${type}</b>
+
+</p>
+
+<br>
+
+<p>
+
+Generating simulated
+security telemetry...
+
+</p>
+
+<br>
+
+<span class="badge">
+
+SOC Simulation Active
+
+</span>
+
+`;
+
+/* OPTIONAL LOG EVENT */
+fetch("/ask",{
 
 method:"POST",
 
@@ -94,31 +286,11 @@ headers:{
 Authorization:"Bearer "+token
 },
 
-body:JSON.stringify({type})
+body:JSON.stringify({
+
+question:type
 
 })
-
-.then(r=>r.json())
-
-.then(data=>{
-
-document.getElementById("output").innerHTML = `
-
-<div class="card">
-
-<h2>🚨 Attack Event Generated</h2>
-
-<p><b>Attack:</b> ${data.type}</p>
-
-<p><b>Severity:</b> ${data.severity}</p>
-
-<p>
-SOC event successfully sent to dashboard.
-</p>
-
-</div>
-
-`;
 
 });
 
